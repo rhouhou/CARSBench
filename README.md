@@ -78,6 +78,3 @@ Supports:
 
 ```bash
 pip install -e .
-
-## Quick Start
-pip install CARSBench[hdf5]

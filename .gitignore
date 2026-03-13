@@ -3,9 +3,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# Virtual environment
-.venv/
+*.py[cod]
 
 # Build / packaging
 build/
@@ -13,17 +11,51 @@ dist/
 *.egg-info/
 .eggs/
 
-# IDE
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Lint / formatter
+.ruff_cache/
+
+# macOS
+.DS_Store
+
+# IDEs
 .vscode/
 .idea/
 
-# Data outputs
+# Local data outputs
+data/
+qa_plots/
+paper_figures/
+inspection_outputs/
+tmp_*/
+tmp*/
 *.npz
-*.h5
+*.npy
+*.jsonl
 
-# OS files (macOS)
-.DS_Store
+# Generated images
+*.png
+*.pdf
+*.svg
 
+# Logs
+*.log
+
+# OS files
+Thumbs.db
 # Logs
 *.log
 

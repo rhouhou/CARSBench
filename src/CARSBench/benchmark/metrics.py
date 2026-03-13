@@ -1,34 +1,84 @@
 from __future__ import annotations
-from dataclasses import dataclass
+
 import numpy as np
 
 
-@dataclass
-class MetricResult:
-    name: str
-    value: float
+def rmse(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+) -> float:
+    """
+    Root mean squared error.
+    """
+    y_true = np.asarray(y_true, dtype=np.float64)
+    y_pred = np.asarray(y_pred, dtype=np.float64)
 
-
-def rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    y_true = np.asarray(y_true).astype(float)
-    y_pred = np.asarray(y_pred).astype(float)
     return float(np.sqrt(np.mean((y_true - y_pred) ** 2)))
 
 
-def mae(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    y_true = np.asarray(y_true).astype(float)
-    y_pred = np.asarray(y_pred).astype(float)
+def mae(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+) -> float:
+    """
+    Mean absolute error.
+    """
+    y_true = np.asarray(y_true, dtype=np.float64)
+    y_pred = np.asarray(y_pred, dtype=np.float64)
+
     return float(np.mean(np.abs(y_true - y_pred)))
 
 
-def sam(y_true: np.ndarray, y_pred: np.ndarray, eps: float = 1e-12) -> float:
+def spectral_angle(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    eps: float = 1e-12,
+) -> float:
     """
-    Spectral Angle Mapper (in radians).
-    Smaller is better.
+    Spectral angle mapper (SAM) in radians.
     """
-    a = np.asarray(y_true).astype(float).ravel()
-    b = np.asarray(y_pred).astype(float).ravel()
-    num = float(np.dot(a, b))
-    den = float(np.linalg.norm(a) * np.linalg.norm(b) + eps)
-    cos = np.clip(num / den, -1.0, 1.0)
-    return float(np.arccos(cos))
+    y_true = np.asarray(y_true, dtype=np.float64)
+    y_pred = np.asarray(y_pred, dtype=np.float64)
+
+    num = float(np.dot(y_true, y_pred))
+    den = float(np.linalg.norm(y_true) * np.linalg.norm(y_pred) + eps)
+
+    cosine = np.clip(num / den, -1.0, 1.0)
+    return float(np.arccos(cosine))
+
+
+def false_peak_energy(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    threshold_ratio: float = 0.05,
+    eps: float = 1e-12,
+) -> float:
+    """
+    Energy in predicted signal outside true-peak regions.
+
+    Notes
+    -----
+    This is a simple proxy for hallucinated peaks.
+    """
+    y_true = np.asarray(y_true, dtype=np.float64)
+    y_pred = np.asarray(y_pred, dtype=np.float64)
+
+    threshold = threshold_ratio * (np.max(np.abs(y_true)) + eps)
+    support = np.abs(y_true) > threshold
+
+    return float(np.sum(np.abs(y_pred[~support])))
+
+
+def compute_all_metrics(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+) -> dict[str, float]:
+    """
+    Convenience wrapper returning the standard benchmark metrics.
+    """
+    return {
+        "rmse": rmse(y_true, y_pred),
+        "mae": mae(y_true, y_pred),
+        "sam": spectral_angle(y_true, y_pred),
+        "false_peak_energy": false_peak_energy(y_true, y_pred),
+    }

@@ -8,15 +8,77 @@ version = "0.1.0"
 description = "A BCARS Simulation and Generalization Benchmark: BCARS/CARS simulator with complex resonant + NRB susceptibilities, instrument variability, and domain presets."
 readme = "README.md"
 requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Rola Houhou" }
+]
+keywords = [
+  "CARS",
+  "BCARS",
+  "Raman",
+  "spectroscopy",
+  "simulation",
+  "benchmark",
+  "machine-learning",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
 dependencies = [
-  "numpy>=1.23",
+  "numpy>=1.24",
+  "matplotlib>=3.7",
+  "scikit-learn>=1.3",
 ]
 
 [project.optional-dependencies]
-hdf5 = ["h5py>=3.8"]
+dev = [
+  "pytest>=7.4",
+  "ruff>=0.6",
+  "black>=24.0",
+]
+notebooks = [
+  "jupyter>=1.0",
+  "ipykernel>=6.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/rhouhou/CARSBench"
+Repository = "https://github.com/rhouhou/CARSBench"
+Issues = "https://github.com/rhouhou/CARSBench/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "I",
+  "B",
+]
+ignore = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

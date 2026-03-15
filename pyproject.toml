@@ -7,7 +7,7 @@ name = "CARSBench"
 version = "0.1.0"
 description = "A BCARS Simulation and Generalization Benchmark: BCARS/CARS simulator with complex resonant + NRB susceptibilities, instrument variability, and domain presets."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9.5"
 license = { text = "MIT" }
 authors = [
   { name = "Rola Houhou" }

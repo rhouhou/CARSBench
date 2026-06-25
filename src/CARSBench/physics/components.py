@@ -91,7 +91,8 @@ def sample_prototype_variant(
     prototype: PrototypeSpec,
     axis: np.ndarray,
     rng: np.random.Generator,
-) -> np.ndarray:
+    return_metadata: bool = False,
+):
     """
     Generate one stochastic realization of a biochemical prototype.
 
@@ -101,10 +102,11 @@ def sample_prototype_variant(
     chi = np.zeros_like(axis, dtype=np.complex128)
 
     prototype_scale = rng.uniform(prototype.min_scale, prototype.max_scale)
+    realized_peaks = []
 
     for peak in prototype.peaks:
-
-        if rng.random() > peak.presence_prob:
+        present = rng.random() <= peak.presence_prob
+        if not present:
             continue
 
         center = peak.center + rng.normal(0.0, peak.center_jitter_std)
@@ -119,20 +121,49 @@ def sample_prototype_variant(
             sigma=peak.amplitude_jitter_std,
         )
 
+        final_amplitude = prototype_scale * amplitude
+
         chi += lorentzian_complex(
             axis=axis,
-            center=center,
-            gamma=width,
-            amplitude=prototype_scale * amplitude,
+            center=float(center),
+            gamma=float(width),
+            amplitude=float(final_amplitude),
         )
+
+        realized_peaks.append(
+            {
+                "source": prototype.name,
+                "kind": "prototype",
+                "center": float(center),
+                "width": float(width),
+                "amplitude": float(final_amplitude),
+                "base_center": float(peak.center),
+                "base_width": float(peak.width),
+                "base_amplitude": float(peak.amplitude),
+                "prototype_scale": float(prototype_scale),
+                "presence_prob": float(peak.presence_prob)
+            }
+        )
+
+        if return_metadata:
+            metadata = {
+                "prototype_name": prototype.name,
+                "prototype_scale": float(prototype_scale),
+                "num_realized_peaks": len(realized_peaks),
+                "realized_peaks": realized_peaks,
+            }
+            return chi, metadata
 
     return chi
 
 def sample_minor_background_peaks(
     axis: np.ndarray,
     rng: np.random.Generator,
-    max_peaks: int = 3,
-) -> np.ndarray:
+    max_peaks: int = 1,
+    amplitude_low: float = 0.01,
+    amplitude_high: float = 0.05,
+    return_metadata: bool = False,
+):
     """
     Generate weak random biochemical peaks representing
     minor molecules or unknown chemistry.
@@ -140,20 +171,36 @@ def sample_minor_background_peaks(
     n = int(rng.integers(0, max_peaks + 1))
 
     chi = np.zeros_like(axis, dtype=np.complex128)
+    realized_peaks = []
 
     for _ in range(n):
-
-        center = rng.uniform(axis.min(), axis.max())
+        center = rng.uniform(float(axis.min()), float(axis.max()))
         width = rng.uniform(5.0, 20.0)
-
-        amplitude = rng.uniform(0.05, 0.15)
+        amplitude = rng.uniform(amplitude_low, amplitude_high)
 
         chi += lorentzian_complex(
             axis=axis,
-            center=center,
-            gamma=width,
-            amplitude=amplitude,
+            center=float(center),
+            gamma=float(width),
+            amplitude=float(amplitude),
         )
+
+        realized_peaks.append(
+            {
+                "source": "minor_background",
+                "kind": "minor_background",
+                "center": float(center),
+                "width": float(width),
+                "amplitude": float(amplitude),
+            }
+        )
+
+    if return_metadata:
+        metadata = {
+            "num_realized_peaks": len(realized_peaks),
+            "realized_peaks": realized_peaks,
+        }
+        return chi, metadata
 
     return chi
 
@@ -169,11 +216,12 @@ def sample_prototype_mixture(
     max_components: int = 3,
     allowed_prototypes: Optional[Sequence[str]] = None,
     return_metadata: bool = False,
-) -> np.ndarray:
+    minor_background_max_peaks: int = 1,
+    component_weight_concentration: float = 2.5,
+):
     """
     Generate a correlated Raman spectrum from a mixture of prototypes.
     """
-
     names = (
         list(allowed_prototypes)
         if allowed_prototypes is not None
@@ -193,33 +241,92 @@ def sample_prototype_mixture(
     chosen = rng.choice(names, size=n_components, replace=False)
     chosen = [str(x) for x in chosen]
 
-    weights = rng.dirichlet(np.ones(n_components))
+    weights = rng.dirichlet(np.ones(n_components) * component_weight_concentration)
 
     chi = np.zeros_like(axis, dtype=np.complex128)
 
-    for name, w in zip(chosen, weights):
+    component_metadata = []
+    all_realized_peaks = []
 
+    for name, w in zip(chosen, weights):
         prototype = library.get(name)
 
-        chi_variant = sample_prototype_variant(
-            prototype=prototype,
+        if return_metadata:
+            chi_variant, variant_meta = sample_prototype_variant(
+                prototype=prototype,
+                axis=axis,
+                rng=rng,
+                return_metadata=True,
+            )
+            weighted_peaks = []
+            for peak in variant_meta["realized_peaks"]:
+                weighted_peak = dict(peak)
+                weighted_peak["mixture_weight"] = float(w)
+                weighted_peak["amplitude_before_mixture_weight"] = float(peak["amplitude"])
+                weighted_peak["amplitude"] = float(w) * float(peak["amplitude"])
+                weighted_peaks.append(weighted_peak)
+
+            component_metadata.append(
+                {
+                    "prototype_name": name,
+                    "mixture_weight": float(w),
+                    "prototype_scale": float(variant_meta["prototype_scale"]),
+                    "num_realized_peaks": int(variant_meta["num_realized_peaks"]),
+                    "realized_peaks": weighted_peaks,
+                }
+            )
+
+            all_realized_peaks.extend(weighted_peaks)
+        else:
+            chi_variant = sample_prototype_variant(
+                prototype=prototype,
+                axis=axis,
+                rng=rng,
+                return_metadata=False,
+            )
+
+        chi += float(w) * chi_variant
+
+    if return_metadata:
+        chi_minor, minor_meta = sample_minor_background_peaks(
             axis=axis,
             rng=rng,
+            max_peaks=minor_background_max_peaks,
+            amplitude_low=0.01,
+            amplitude_high=0.05,
+            return_metadata=True,
         )
+        chi += chi_minor
 
-        chi += w * chi_variant
-    
-    chi += sample_minor_background_peaks(axis, rng)
-    
-    if return_metadata:
+        all_realized_peaks.extend(minor_meta["realized_peaks"])
+
         metadata = {
             "selected_components": chosen,
             "mixture_weights": [float(w) for w in weights],
             "max_components": int(max_components),
             "allowed_components": None if allowed_prototypes is None else list(allowed_prototypes),
+            "n_components": int(n_components),
+            "component_metadata": component_metadata,
+            "minor_background_metadata": minor_meta,
+            "minor_background_max_peaks": int(minor_background_max_peaks),
+            "component_weight_concentration": float(component_weight_concentration),
+            "num_peaks": int(len(all_realized_peaks)),
+            "peak_table": all_realized_peaks,
+            "peak_centers": [float(p["center"]) for p in all_realized_peaks],
+            "peak_widths": [float(p["width"]) for p in all_realized_peaks],
+            "peak_amplitudes": [float(p["amplitude"]) for p in all_realized_peaks],
+            "peak_sources": [str(p["source"]) for p in all_realized_peaks],
+            "lineshape": "lorentzian",
         }
         return chi, metadata
-    
+
+    chi += sample_minor_background_peaks(
+        axis, 
+        rng,
+        max_peaks=minor_background_max_peaks,
+        amplitude_low=0.01,
+        amplitude_high=0.05,
+        )
     return chi
 
 
@@ -246,17 +353,19 @@ def build_default_prototype_library() -> PrototypeLibrary:
         PrototypeSpec(
             name="lipid",
             peaks=[
+                PeakSpec(972, 7, 0.35, presence_prob=0.5),
                 PeakSpec(1060, 8, 0.5),
+                PeakSpec(1085, 7, 0.35, presence_prob=0.5),
                 PeakSpec(1128, 7, 0.6),
+                PeakSpec(1265, 9, 0.5, presence_prob=0.7),
                 PeakSpec(1298, 9, 0.8),
+                PeakSpec(1305, 9, 0.45, presence_prob=0.5),
                 PeakSpec(1442, 12, 1.2),
-
-                # optional peaks
                 PeakSpec(1655, 14, 0.9, presence_prob=0.7),
                 PeakSpec(1740, 10, 0.5, presence_prob=0.4),
-
-                PeakSpec(2850, 15, 1.6),
-                PeakSpec(2880, 15, 1.4),
+                PeakSpec(2850, 15, 1.8),
+                PeakSpec(2880, 15, 1.6),
+                PeakSpec(2930, 14, 0.9, presence_prob=0.7),
             ],
         )
     )
@@ -269,16 +378,20 @@ def build_default_prototype_library() -> PrototypeLibrary:
         PrototypeSpec(
             name="protein",
             peaks=[
-                PeakSpec(1003, 7, 0.8),
-                PeakSpec(1245, 9, 0.6),
-                PeakSpec(1335, 10, 0.5),
+                PeakSpec(855, 7, 0.4, presence_prob=0.5),
+                PeakSpec(938, 8, 0.5),
+                PeakSpec(1003, 7, 0.9),
+                PeakSpec(1245, 9, 0.8),
+                PeakSpec(1335, 10, 0.6),
+                PeakSpec(1450, 12, 1.0),
 
-                PeakSpec(1448, 12, 1.0),
-
-                PeakSpec(1660, 14, 1.2),
+                # Amide I / II region
+                PeakSpec(1660, 14, 1.3),
                 PeakSpec(1675, 14, 0.5, presence_prob=0.4),
 
-                PeakSpec(2935, 14, 1.4),
+                # CH region but less dominant than lipid
+                PeakSpec(2870, 15, 0.9),
+                PeakSpec(2935, 14, 1.2),
             ],
         )
     )
@@ -291,14 +404,18 @@ def build_default_prototype_library() -> PrototypeLibrary:
         PrototypeSpec(
             name="nucleic_acid",
             peaks=[
-                PeakSpec(785, 7, 1.2),
-                PeakSpec(1092, 8, 0.9),
+                PeakSpec(728, 7, 0.8, presence_prob=0.6),
+                PeakSpec(785, 7, 1.4),
+                PeakSpec(830, 7, 0.5, presence_prob=0.5),
+                PeakSpec(1092, 8, 1.0),
+                PeakSpec(1125, 8, 0.5, presence_prob=0.5),
+                PeakSpec(1338, 10, 0.8),
+                PeakSpec(1375, 10, 0.5, presence_prob=0.5),
+                PeakSpec(1485, 11, 0.7),
+                PeakSpec(1578, 12, 0.6),
 
-                PeakSpec(1338, 10, 0.7),
-                PeakSpec(1375, 10, 0.4, presence_prob=0.5),
-
-                PeakSpec(1485, 11, 0.6),
-                PeakSpec(1578, 12, 0.5),
+                # weak CH (important to avoid trivial separation)
+                PeakSpec(2930, 14, 0.3, presence_prob=0.5),
             ],
         )
     )
@@ -311,10 +428,16 @@ def build_default_prototype_library() -> PrototypeLibrary:
         PrototypeSpec(
             name="aromatic",
             peaks=[
-                PeakSpec(1003, 6, 1.2),
-                PeakSpec(1032, 7, 0.7),
-                PeakSpec(1602, 8, 1.3),
-                PeakSpec(1620, 9, 0.9),
+                PeakSpec(1003, 6, 1.3),
+                PeakSpec(1032, 7, 0.8),
+                PeakSpec(1175, 8, 0.5, presence_prob=0.5),
+                PeakSpec(1208, 8, 0.4, presence_prob=0.5),
+                PeakSpec(1585, 8, 0.9),
+                PeakSpec(1602, 8, 1.5),
+                PeakSpec(1620, 9, 1.0),
+
+                # very weak CH contribution
+                PeakSpec(3050, 12, 0.3, presence_prob=0.5),
             ],
         )
     )

@@ -140,3 +140,38 @@ class DomainSampler:
             specs.append(spec)
 
         return specs
+    
+    def resolve_with_overrides(
+        self,
+        domain: DomainConfig,
+        section_overrides: Optional[Mapping[str, Any]] = None,
+        seed: Optional[int] = None,
+    ) -> DomainSpec:
+        """
+        Resolve a domain normally, then overwrite selected top-level sections
+        or subsection keys with provided realized values.
+        """
+        spec = self.resolve(domain=domain, seed=seed)
+        resolved = copy.deepcopy(spec.resolved)
+
+        if section_overrides is not None:
+            for key, value in section_overrides.items():
+                if (
+                    key in resolved
+                    and isinstance(resolved[key], Mapping)
+                    and isinstance(value, Mapping)
+                ):
+                    merged_section = copy.deepcopy(resolved[key])
+                    for subkey, subvalue in value.items():
+                        merged_section[subkey] = copy.deepcopy(subvalue)
+                    resolved[key] = merged_section
+                else:
+                    resolved[key] = copy.deepcopy(value)
+
+        resolved_seed = seed if seed is not None else self.seed
+
+        return DomainSpec(
+            config=domain,
+            resolved=resolved,
+            seed=resolved_seed,
+        )

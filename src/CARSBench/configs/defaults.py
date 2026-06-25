@@ -2,7 +2,6 @@ from __future__ import annotations
 from copy import deepcopy
 
 BASE_DEFAULTS = {
-
     "axis": {
         "window_mode": "full",
         "nu_min": 400.0,
@@ -17,29 +16,29 @@ BASE_DEFAULTS = {
     },
 
     "nrb": {
-        "family": "poly",
-        "alpha": 1.0,
-        "phase_model": "linear",
-        "phase_total_change": 0.0,
+        "family": {"dist": "choice", "values": ["flat", "poly"]},
+        "alpha": {"dist": "log_uniform", "low": 0.8, "high": 1.5},
+        "phase_model": {"dist": "choice", "values": ["linear", "quadratic"]},
+        "phase_total_change": {"dist": "uniform", "low": -1.0, "high": 1.0},
         "phase_offset": 0.0,
     },
 
     "instrument": {
-        "psf_fwhm": 10.0,
-        "envelope_family": "hybrid",
+        "psf_fwhm": {"dist": "uniform", "low": 8.0, "high": 14.0},
+        "envelope_family": {"dist": "choice", "values": ["hybrid", "poly", "gaussian"]},
     },
 
     "baseline": {
         "family": "poly",
-        "poly_std": 0.01,
-        "correlated_std": 0.003,
-        "correlated_knots": 10,
+        "poly_std": {"dist": "uniform", "low": 0.008, "high": 0.015},
+        "correlated_std": {"dist": "uniform", "low": 0.002, "high": 0.005},
+        "correlated_knots": {"dist": "choice", "values": [8, 10, 12]},
     },
 
     "noise": {
-        "shot_scale": 1e5,
-        "read_sigma": 2.0,
-        "spike_prob": 0.0,
+        "shot_scale": {"dist": "log_uniform", "low": 1e4, "high": 3e5},
+        "read_sigma": {"dist": "uniform", "low": 0.5, "high": 5.0},
+        "spike_prob": {"dist": "uniform", "low": 0.0, "high": 5e-4},
         "spike_min": None,
         "spike_max": None,
     },
@@ -52,8 +51,8 @@ BASE_DEFAULTS = {
     },
 
     "calibration": {
-        "shift_cm1": 0.0,
-        "warp_cm1": 0.0,
+        "shift_cm1": {"dist": "uniform", "low": -5.0, "high": 5.0},
+        "warp_cm1": {"dist": "uniform", "low": -10.0, "high": 10.0},
     },
 }
 

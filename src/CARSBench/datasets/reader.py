@@ -168,3 +168,17 @@ class DatasetReader:
         num_points: int,
     ) -> SampleBatch:
         return SampleBatch([s for s in batch if s.num_points == num_points])
+    
+    def read_all_batches(
+        self,
+        relative_dir: str | Path = "batches",
+    ) -> SampleBatch:
+        directory = self._resolve(relative_dir)
+        files = sorted(directory.glob("*.npz"))
+
+        all_samples: list[SpectrumSample] = []
+        for f in files:
+            batch = self.read_batch_npz(f)
+            all_samples.extend(batch.samples)
+
+        return SampleBatch(all_samples)

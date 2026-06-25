@@ -6,7 +6,8 @@ from typing import Optional
 import numpy as np
 
 from CARSBench.datasets.schema import SampleMetadata, SpectrumSample
-from CARSBench.domains.base import DomainSpec
+from CARSBench.domains.base import DomainConfig, DomainSpec
+from CARSBench.domains.samplers import DomainSampler
 from CARSBench.instrument import (
     apply_calibration_distortion,
     apply_detector_model,
@@ -171,6 +172,63 @@ class SampleSimulator:
 
             sample = self.simulate_sample(
                 domain_spec=domain_spec,
+                sample_id=sample_id,
+                seed=sample_seed,
+                generator=generator,
+                include_latents=include_latents,
+            )
+            samples.append(sample)
+
+        return samples
+    
+    def simulate_domain_samples_resolved_per_sample(
+        self,
+        domain_cfg: DomainConfig,
+        domain_sampler: DomainSampler,
+        num_samples: int,
+        id_prefix: Optional[str] = None,
+        start_index: int = 0,
+        include_latents: bool = True,
+        generator: str = "frequency",
+    ) -> list[SpectrumSample]:
+        """
+        Simulate samples from a domain with partial per-sample re-resolution.
+
+        Rules:
+        - For most domains: keep the whole axis fixed within the domain.
+        - For E_window_shift: keep only axis.num_points fixed, while allowing
+          window_mode / nu_min / nu_max to vary per sample.
+        """
+        prefix = id_prefix if id_prefix is not None else domain_cfg.name
+        samples: list[SpectrumSample] = []
+
+        template_seed = child_seed(self.rng)
+        template_spec = domain_sampler.resolve(domain=domain_cfg, seed=template_seed)
+        template_axis = template_spec.resolved.get("axis", {})
+
+        if domain_cfg.name == "E_window_shift":
+            section_overrides = {
+                "axis": {
+                    "num_points": template_axis.get("num_points"),
+                }
+            }
+        else:
+            section_overrides = {
+                "axis": template_axis,
+            }
+
+        for i in range(num_samples):
+            sample_seed = child_seed(self.rng)
+            sample_id = f"{prefix}_{start_index + i:06d}"
+
+            sample_domain_spec = domain_sampler.resolve_with_overrides(
+                domain=domain_cfg,
+                section_overrides=section_overrides,
+                seed=sample_seed,
+            )
+
+            sample = self.simulate_sample(
+                domain_spec=sample_domain_spec,
                 sample_id=sample_id,
                 seed=sample_seed,
                 generator=generator,

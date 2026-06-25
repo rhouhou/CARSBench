@@ -63,7 +63,6 @@ def main() -> None:
         print(f"\n=== Generating {domain_name} ===")
 
         domain_cfg = registry.get(domain_name)
-        domain_spec = sampler.resolve(domain_cfg, seed=args.seed)
 
         domain_root = output_root / domain_name
         writer = DatasetWriter(domain_root)
@@ -81,8 +80,9 @@ def main() -> None:
 
             print(f"  chunk {chunk_idx+1}/{n_chunks} | samples {start}..{end-1}")
 
-            batch = batch_sim.simulate_from_domain(
-                domain_spec=domain_spec,
+            batch = batch_sim.simulate_from_domain_resolved_per_sample(
+                domain_cfg=domain_cfg,
+                domain_sampler=sampler,
                 num_samples=n_this,
                 id_prefix=domain_name,
                 start_index=start,
@@ -115,6 +115,9 @@ def main() -> None:
                 "chunk_size": chunk_size,
                 "include_latents": bool(args.include_latents),
                 "master_seed": args.seed,
+                "resolution_policy": (
+                    "axis_fixed_per_domain_except_E_window_shift_where_only_num_points_is_fixed"
+                )
             },
         )
 

@@ -18,30 +18,7 @@ def make_domain_a_typical() -> DomainConfig:
                 "window_mode": {"dist": "choice", "values": ["full", "wide"]},
                 "nu_min": {"dist": "uniform", "low": 350.0, "high": 600.0},
                 "nu_max": {"dist": "uniform", "low": 3000.0, "high": 3300.0},
-                "num_points": {"dist": "choice", "values": [1024, 2048]},
-            },
-            "instrument": {
-                "psf_fwhm": {"dist": "uniform", "low": 8.0, "high": 14.0},
-                "envelope_family": {"dist": "choice", "values": ["hybrid", "poly", "gaussian"]},
-            },
-            "noise": {
-                "shot_scale": {"dist": "log_uniform", "low": 1e4, "high": 3e5},
-                "read_sigma": {"dist": "uniform", "low": 0.5, "high": 5.0},
-                "spike_prob": {"dist": "uniform", "low": 0.0, "high": 5e-4},
-            },
-            "calibration": {
-                "shift_cm1": {"dist": "uniform", "low": -5.0, "high": 5.0},
-                "warp_cm1": {"dist": "uniform", "low": -10.0, "high": 10.0},
-            },
-            "nrb": {
-                "family": {"dist": "choice", "values": ["flat", "poly", "exp_tilt"]},
-                "alpha": {"dist": "log_uniform", "low": 0.8, "high": 1.5},
-                "phase_model": {"dist": "choice", "values": ["linear", "quadratic"]},
-                "phase_total_change": {
-                    "dist": "uniform",
-                    "low": -1.0,
-                    "high": 1.0,
-                },
+                "num_points": 1024,
             },
         },
     )
@@ -115,7 +92,9 @@ def make_domain_e_window_shift() -> DomainConfig:
                     "values": ["fingerprint", "ch", "partial_fingerprint", "partial_ch"],
                     "p": [0.35, 0.35, 0.15, 0.15],
                 },
-                "num_points": {"dist": "choice", "values": [512, 1024, 2048]},
+                "nu_min": {"dist": "uniform", "low": 500.0, "high": 1200.0},
+                "nu_max": {"dist": "uniform", "low": 1800.0, "high": 3100.0},
+                "num_points": 1024,
             },
         },
     )
@@ -153,25 +132,8 @@ def make_domain_g_biochemical_source() -> DomainConfig:
                 "mode": "component",
                 "max_components": 3,
                 "allowed_components": ["lipid", "protein"],
-            },
-            "nrb": {
-                "family": "poly",
-                "alpha": {"dist": "log_uniform", "low": 0.8, "high": 1.5},
-                "phase_model": {"dist": "choice", "values": ["linear", "quadratic"]},
-                "phase_total_change": {"dist": "uniform", "low": -1.0, "high": 1.0},
-            },
-            "instrument": {
-                "psf_fwhm": {"dist": "uniform", "low": 8.0, "high": 14.0},
-                "envelope_family": {"dist": "choice", "values": ["hybrid", "poly", "gaussian"]},
-            },
-            "noise": {
-                "shot_scale": {"dist": "log_uniform", "low": 1e4, "high": 3e5},
-                "read_sigma": {"dist": "uniform", "low": 0.5, "high": 5.0},
-                "spike_prob": {"dist": "uniform", "low": 0.0, "high": 5e-4},
-            },
-            "calibration": {
-                "shift_cm1": {"dist": "uniform", "low": -5.0, "high": 5.0},
-                "warp_cm1": {"dist": "uniform", "low": -10.0, "high": 10.0},
+                "minor_background_max_peaks": 0, # 1 for final benchmark
+                "component_weight_concentration": 3, #2.5 for final benchmark
             },
         },
     )
@@ -190,25 +152,8 @@ def make_domain_h_biochemical_target() -> DomainConfig:
                 "mode": "component",
                 "max_components": 3,
                 "allowed_components": ["nucleic_acid", "aromatic"],
-            },
-            "nrb": {
-                "family": "poly",
-                "alpha": {"dist": "log_uniform", "low": 0.8, "high": 1.5},
-                "phase_model": {"dist": "choice", "values": ["linear", "quadratic"]},
-                "phase_total_change": {"dist": "uniform", "low": -1.0, "high": 1.0},
-            },
-            "instrument": {
-                "psf_fwhm": {"dist": "uniform", "low": 8.0, "high": 14.0},
-                "envelope_family": {"dist": "choice", "values": ["hybrid", "poly", "gaussian"]},
-            },
-            "noise": {
-                "shot_scale": {"dist": "log_uniform", "low": 1e4, "high": 3e5},
-                "read_sigma": {"dist": "uniform", "low": 0.5, "high": 5.0},
-                "spike_prob": {"dist": "uniform", "low": 0.0, "high": 5e-4},
-            },
-            "calibration": {
-                "shift_cm1": {"dist": "uniform", "low": -5.0, "high": 5.0},
-                "warp_cm1": {"dist": "uniform", "low": -10.0, "high": 10.0},
+                "minor_background_max_peaks": 0, #1for final benchmark
+                "component_weight_concentration": 3,#2.5 for final benchmark
             },
         },
     )

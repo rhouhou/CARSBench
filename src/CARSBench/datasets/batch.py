@@ -7,7 +7,8 @@ import numpy as np
 
 from CARSBench.datasets.schema import SampleBatch, SpectrumSample
 from CARSBench.datasets.simulate import SampleSimulator
-from CARSBench.domains.base import DomainSpec
+from CARSBench.domains.base import DomainConfig, DomainSpec
+from CARSBench.domains.samplers import DomainSampler
 
 
 @dataclass
@@ -58,6 +59,27 @@ class BatchSimulator:
             all_samples.extend(samples)
 
         return SampleBatch(all_samples)
+    
+    def simulate_from_domain_resolved_per_sample(
+        self,
+        domain_cfg: DomainConfig,
+        domain_sampler: DomainSampler,
+        num_samples: int,
+        id_prefix: Optional[str] = None,
+        start_index: int = 0,
+        include_latents: bool = True,
+        generator: str = "frequency",
+    ) -> SampleBatch:
+        samples = self.simulator.simulate_domain_samples_resolved_per_sample(
+            domain_cfg=domain_cfg,
+            domain_sampler=domain_sampler,
+            num_samples=num_samples,
+            id_prefix=id_prefix,
+            start_index=start_index,
+            include_latents=include_latents,
+            generator=generator,
+        )
+        return SampleBatch(samples)
 
     def simulate_from_domains_variable(
         self,

@@ -590,6 +590,14 @@ See [`CHANGELOG.md`](CHANGELOG.md) for version history.
 
 ---
 
+## Contributing
+
+Contributions, suggestions, and documentation improvements are welcome.
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for development setup, testing, formatting, and contribution guidelines.
+
+---
+
 ## License
 
 This project is licensed under the MIT License.

@@ -63,20 +63,24 @@ This project demonstrates:
 
 CARSBench is currently an **alpha-stage research and portfolio project**.
 
-| Component                              | Status                     |
-| -------------------------------------- | -------------------------- |
-| Frequency-domain BCARS/CARS simulation | Implemented                |
-| Eight domain presets                   | Implemented                |
-| Raman-equivalent target generation     | Implemented                |
-| Chunked dataset writing                | Implemented                |
-| Multi-seed generation workflow         | Implemented                |
-| QC and validation scripts              | Implemented                |
-| Visualization scripts                  | Implemented                |
-| Baseline benchmark utilities           | Partially implemented      |
-| Unit tests                             | Planned / next improvement |
-| GitHub Actions CI                      | Planned / next improvement |
-| Full ML training benchmark             | Planned                    |
-| Real experimental validation           | Planned                    |
+| Component | Status |
+|---|---|
+| Frequency-domain BCARS/CARS simulation | Implemented |
+| Eight domain presets | Implemented |
+| Raman-equivalent target generation | Implemented |
+| Chunked dataset writing | Implemented |
+| Multi-seed generation workflow | Implemented |
+| QC and validation scripts | Implemented |
+| Visualization scripts | Implemented |
+| Baseline benchmark utilities | Implemented |
+| Basic API tests | Implemented |
+| Domain generation tests | Implemented |
+| Reproducibility tests | Implemented |
+| Dataset I/O tests | Implemented |
+| Benchmark metric tests | Implemented |
+| GitHub Actions CI | Implemented |
+| Full ML training benchmark | Planned |
+| Real experimental validation | Planned |
 
 ---
 
@@ -556,8 +560,8 @@ The baseline benchmark provides a simple starting point for future comparisons w
 
 Planned improvements include:
 
-* Add unit tests for the public API, domain registry, reproducibility, and dataset I/O
-* Add GitHub Actions CI for linting, formatting, smoke tests, and unit tests
+* Expand test coverage for simulation physics, domain presets, and benchmark tasks
+* Add smoke-test execution to GitHub Actions CI
 * Add documentation pages for domain definitions and dataset format
 * Add example figures to the README
 * Add baseline benchmark results across domains

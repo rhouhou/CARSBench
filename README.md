@@ -517,6 +517,41 @@ Recommended pages:
 
 ---
 
+## Baseline benchmark example
+
+CARSBench includes a lightweight baseline benchmark script:
+
+```bash
+python scripts/12_run_baseline_benchmark.py
+```
+
+This script evaluates simple non-learning baselines across all benchmark domains and saves the results to:
+
+```text
+results/benchmark/baseline_results.csv
+```
+
+The included baselines are intended as sanity checks, not as strong Raman-retrieval methods.
+
+They help verify that:
+
+* datasets can be generated across all domains
+* Raman-equivalent targets are available
+* benchmark metrics can be computed
+* domain-level evaluation outputs can be saved and compared
+
+Typical output metrics include:
+
+| Metric         | Meaning                                                     |
+| -------------- | ----------------------------------------------------------- |
+| RMSE           | Root mean squared error between prediction and Raman target |
+| MAE            | Mean absolute error between prediction and Raman target     |
+| Spectral angle | Shape-based similarity between prediction and Raman target  |
+
+The baseline benchmark provides a simple starting point for future comparisons with stronger retrieval methods, phase-retrieval pipelines, or machine-learning models.
+
+---
+
 ## Roadmap
 
 Planned improvements include:

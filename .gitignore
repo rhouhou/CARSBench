@@ -63,5 +63,9 @@ tmp*/
 !results/README.md
 !results/.gitkeep
 
+# Keep lightweight benchmark summaries
+!results/benchmark/
+!results/benchmark/*.csv
+
 # Logs
 *.log

@@ -412,6 +412,8 @@ Typical QC files include:
 | `general_qc_raman_target.csv`    | QC on Raman-equivalent target signals                |
 | `specific_domain_qc.csv`         | Checks for expected domain-specific parameter shifts |
 
+For a more detailed explanation of QC outputs and interpretation, see [`docs/qc_results.md`](docs/qc_results.md).
+
 The QC workflow is intended to verify that each domain produces the expected type of variation before the dataset is used for ML benchmarking.
 
 See [`qc/README.md`](qc/README.md) for more details.

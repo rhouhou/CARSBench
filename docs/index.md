@@ -14,6 +14,7 @@ CARSBench is an alpha-stage simulation and benchmarking framework for testing cr
 | [`dataset_format.md`](dataset_format.md) | Describes the generated dataset structure, `.npz` batch files, metadata, and manifest files |
 | [`reproducibility.md`](reproducibility.md) | Explains recommended seeds, generation commands, and reproducibility practices |
 | [`baselines.md`](baselines.md) | Explains the lightweight baseline benchmark and output metrics |
+| [`qc_results.md`](qc_results.md) | Explains QC outputs and how to interpret validation summaries |
 
 ---
 

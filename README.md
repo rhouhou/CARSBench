@@ -116,6 +116,8 @@ CARSBench currently includes eight domains.
 | `G_biochemical_source` | Lipid/protein-dominant chemistry     | Biochemical shift |
 | `H_biochemical_target` | Nucleic/aromatic-dominant chemistry  | Biochemical shift |
 
+For a more detailed explanation of each domain and suggested benchmark setups, see [`docs/domains.md`](docs/domains.md).
+
 These domains are intended for cross-domain generalization experiments, for example:
 
 * train on typical acquisition conditions and test on noisy spectra

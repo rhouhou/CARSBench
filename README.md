@@ -484,6 +484,8 @@ The recommended benchmark seeds are:
 
 Each generated domain includes metadata and a manifest file so that simulation settings can be inspected after generation.
 
+For detailed seed recommendations, generation commands, and reporting practices, see [`docs/reproducibility.md`](docs/reproducibility.md).
+
 ---
 
 ## Limitations

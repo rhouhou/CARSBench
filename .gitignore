@@ -28,8 +28,9 @@ htmlcov/
 # Lint / formatter
 .ruff_cache/
 
-# macOS
+# macOS / OS files
 .DS_Store
+Thumbs.db
 
 # IDEs
 .vscode/
@@ -51,16 +52,16 @@ tmp*/
 *.pdf
 *.svg
 
+# Keep documentation images
+!docs/assets/
+!docs/assets/*.png
+!docs/assets/*.pdf
+!docs/assets/*.svg
+
+# Keep lightweight results documentation
+!results/
+!results/README.md
+!results/.gitkeep
+
 # Logs
 *.log
-
-# OS files
-Thumbs.db
-# Logs
-*.log
-
-# Pytest cache
-.pytest_cache/
-
-# Jupyter (if you ever use it)
-.ipynb_checkpoints/

@@ -299,6 +299,8 @@ python scripts/09_specific_domain_qc.py \
 
 ## Dataset format
 
+For a more detailed explanation of the generated files and array keys, see [`docs/dataset_format.md`](docs/dataset_format.md).
+
 Generated datasets are written in a chunked format:
 
 ```text

@@ -504,6 +504,18 @@ This project is **not intended for clinical diagnosis, medical decision-making, 
 
 ---
 
+## Documentation
+
+Additional documentation is available in the [`docs/`](docs/) folder.
+
+Recommended pages:
+
+- [`docs/domains.md`](docs/domains.md)
+- [`docs/dataset_format.md`](docs/dataset_format.md)
+- [`docs/reproducibility.md`](docs/reproducibility.md)
+
+---
+
 ## Roadmap
 
 Planned improvements include:

@@ -549,6 +549,12 @@ If you use CARSBench in research or educational work, please cite:
 
 ---
 
+## Changelog
+
+See [`CHANGELOG.md`](CHANGELOG.md) for version history.
+
+---
+
 ## License
 
 This project is licensed under the MIT License.

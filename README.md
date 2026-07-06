@@ -168,6 +168,30 @@ pip install -r requirements.txt
 
 ---
 
+## Installation check
+
+After installation, verify that CARSBench can be imported and that the domain registry is available:
+
+```bash
+python3 -c "import CARSBench as cb; print(cb.list_domains())"
+```
+
+Expected output should include the benchmark domains:
+
+```text
+['A_typical', 'B_high_res', 'C_low_res_noisy', 'D_calibration_shift', 'E_window_shift', 'F_nrb_family_shift', 'G_biochemical_source', 'H_biochemical_target']
+```
+
+You can also run the smoke test:
+
+```bash
+python3 scripts/00_smoke_test.py
+```
+
+The smoke test checks that dataset generation, sample writing, batch writing, and reading work correctly.
+
+---
+
 ## Quickstart
 
 Generate a small dataset from the reference domain:

@@ -37,3 +37,7 @@ jobs:
       - name: Run tests
         run: |
           python -m pytest
+
+      - name: Run smoke test
+        run: |
+          python scripts/00_smoke_test.py

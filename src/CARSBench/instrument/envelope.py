@@ -40,6 +40,7 @@ def gaussian_envelope(
     env = amplitude * np.exp(-0.5 * ((axis - center) / max(sigma, 1e-12)) ** 2)
     return np.clip(env, 1e-8, None)
 
+
 def smooth_polynomial_envelope(
     axis: np.ndarray,
     rng: np.random.Generator,
@@ -100,6 +101,7 @@ def hybrid_gaussian_tilt_envelope(
 
     return np.clip(env, 1e-8, None)
 
+
 def spectral_ripple(
     axis: np.ndarray,
     rng: np.random.Generator,
@@ -110,13 +112,14 @@ def spectral_ripple(
     """
 
     freq = rng.uniform(1.0, 3.0)
-    phase = rng.uniform(0.0, 2*np.pi)
+    phase = rng.uniform(0.0, 2 * np.pi)
 
     x = (axis - axis.min()) / (axis.max() - axis.min())
 
-    ripple = 1.0 + amplitude * np.sin(2*np.pi*freq*x + phase)
+    ripple = 1.0 + amplitude * np.sin(2 * np.pi * freq * x + phase)
 
     return ripple
+
 
 def build_envelope(
     axis: np.ndarray,
@@ -157,7 +160,7 @@ def build_envelope(
         center = float(cfg.get("center", rng.normal(nu_mid, 0.08 * nu_span)))
         sigma = float(cfg.get("sigma", rng.uniform(0.45 * nu_span, 0.90 * nu_span)))
         amplitude = float(cfg.get("amplitude", 1.0))
-        
+
         env = gaussian_envelope(axis, center=center, sigma=sigma, amplitude=amplitude)
         env /= max(np.mean(env), 1e-12)
 
@@ -180,10 +183,10 @@ def build_envelope(
 
     else:
         raise ValueError(f"Unsupported envelope family: {family!r}")
-    
+
     ripple_amp = float(cfg.get("ripple_amplitude", 0.02))
     ripple = spectral_ripple(axis, rng, amplitude=ripple_amp)
 
-    env *=ripple
+    env *= ripple
 
     return env

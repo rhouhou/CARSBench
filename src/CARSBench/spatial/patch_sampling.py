@@ -43,6 +43,6 @@ def sample_patches(
 
     for i in range(0, h - patch_size + 1, stride):
         for j in range(0, w - patch_size + 1, stride):
-            patches.append(cube[i:i + patch_size, j:j + patch_size, :])
+            patches.append(cube[i : i + patch_size, j : j + patch_size, :])
 
     return patches

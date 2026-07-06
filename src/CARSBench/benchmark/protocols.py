@@ -164,8 +164,10 @@ class ProtocolRunner:
         config: Optional[ProtocolConfig] = None,
     ):
         self.config = config if config is not None else ProtocolConfig()
-        self.simulator = simulator if simulator is not None else SampleSimulator(
-            seed=self.config.seed
+        self.simulator = (
+            simulator
+            if simulator is not None
+            else SampleSimulator(seed=self.config.seed)
         )
         self.batch_simulator = BatchSimulator(self.simulator)
 
@@ -212,7 +214,9 @@ class ProtocolRunner:
         batches = self.generate_protocol_batches(protocol)
 
         dataset_root_name = (
-            dataset_name if dataset_name is not None else f"lodo_test_{protocol.test_spec.name}"
+            dataset_name
+            if dataset_name is not None
+            else f"lodo_test_{protocol.test_spec.name}"
         )
 
         outputs = {}

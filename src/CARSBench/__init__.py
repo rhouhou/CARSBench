@@ -30,23 +30,23 @@ from .api import (
     list_domains,
 )
 
+# Benchmark utilities
+from .benchmark.metrics import (
+    mae,
+    rmse,
+    spectral_angle,
+)
+
 # Common dataset structures
 from .datasets.schema import (
-    SpectrumSample,
     SampleBatch,
+    SpectrumSample,
 )
 
 # Visualization helpers
 from .viz.spectra import (
     plot_sample,
     plot_sample_with_latents,
-)
-
-# Benchmark utilities
-from .benchmark.metrics import (
-    rmse,
-    mae,
-    spectral_angle,
 )
 
 __all__ = [

@@ -1,8 +1,8 @@
+from .abundance import one_hot_abundance_map, random_abundance_map
 from .cubes import build_hyperspectral_cube
-from .abundance import random_abundance_map, one_hot_abundance_map
 from .mixing import apply_pixelwise_noise, linear_mixture
-from .textures import smooth_texture, threshold_texture
 from .patch_sampling import sample_patches
+from .textures import smooth_texture, threshold_texture
 
 __all__ = [
     "build_hyperspectral_cube",

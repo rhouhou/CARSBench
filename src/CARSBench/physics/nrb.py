@@ -35,7 +35,7 @@ def generate_nrb(
         c0 = rng.normal(0.0, 0.02)
         c1 = rng.normal(0.0, 0.05)
         c2 = rng.normal(0.0, 0.03)
-        log_mag = c0 + c1 * x + c2 * x ** 2
+        log_mag = c0 + c1 * x + c2 * x**2
 
     elif family == "exp_tilt":
         slope = float(rng.uniform(-0.25, 0.25))
@@ -45,10 +45,12 @@ def generate_nrb(
         log_mag = np.zeros_like(x)
 
     else:
-        raise ValueError(f"Unsupported NRB family: {family!r}"
-                         "Recommended families are: 'flat', 'poly', 'exp_tilt'.")
+        raise ValueError(
+            f"Unsupported NRB family: {family!r}"
+            "Recommended families are: 'flat', 'poly', 'exp_tilt'."
+        )
 
-    magnitude= alpha * np.exp(log_mag)
+    magnitude = alpha * np.exp(log_mag)
 
     # Phase model
     phi0 = rng.uniform(-np.pi, np.pi) + phase_offset
@@ -58,11 +60,11 @@ def generate_nrb(
 
     elif phase_model == "quadratic":
         u = 0.5 * (x + 1.0)
-        phi = phi0 + phase_total_change * (u ** 2)
+        phi = phi0 + phase_total_change * (u**2)
 
     else:
         raise ValueError(f"Unsupported phase model: {phase_model!r}")
-    
+
     chi_nr = magnitude * np.exp(1j * phi)
     scale = rng.lognormal(mean=0.0, sigma=0.2)
     chi_nr *= scale

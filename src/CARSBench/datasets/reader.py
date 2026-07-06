@@ -57,7 +57,9 @@ class DatasetReader:
 
         with np.load(path, allow_pickle=True) as data:
             if "metadata_json" in data:
-                metadata = SampleMetadata(**self._parse_metadata_item(data["metadata_json"]))
+                metadata = SampleMetadata(
+                    **self._parse_metadata_item(data["metadata_json"])
+                )
             else:
                 metadata = SampleMetadata(
                     sample_id=path.stem,
@@ -68,7 +70,9 @@ class DatasetReader:
                 axis=data["axis"],
                 spectrum=data["spectrum"],
                 raman_target=data["raman_target"],
-                clean_intensity=data["clean_intensity"] if "clean_intensity" in data else None,
+                clean_intensity=(
+                    data["clean_intensity"] if "clean_intensity" in data else None
+                ),
                 chi_r_real=data["chi_r_real"] if "chi_r_real" in data else None,
                 chi_r_imag=data["chi_r_imag"] if "chi_r_imag" in data else None,
                 chi_nr_real=data["chi_nr_real"] if "chi_nr_real" in data else None,
@@ -100,7 +104,9 @@ class DatasetReader:
             raman_target = data["raman_target"]
 
             if "metadata_json" in data:
-                metadata_list = [self._parse_metadata_item(x) for x in data["metadata_json"]]
+                metadata_list = [
+                    self._parse_metadata_item(x) for x in data["metadata_json"]
+                ]
             else:
                 metadata_list = [
                     {"sample_id": f"sample_{i:06d}", "domain_name": "unknown"}
@@ -168,7 +174,7 @@ class DatasetReader:
         num_points: int,
     ) -> SampleBatch:
         return SampleBatch([s for s in batch if s.num_points == num_points])
-    
+
     def read_all_batches(
         self,
         relative_dir: str | Path = "batches",

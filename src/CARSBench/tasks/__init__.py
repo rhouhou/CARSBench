@@ -1,16 +1,16 @@
-from .targets import get_axis, get_measured_spectrum, get_raman_target
-from .retrieval import (
-    highpass_retrieval,
-    moving_average,
-    normalized_highpass_retrieval,
-    zero_retrieval,
-)
 from .normalization import (
     center_spectrum,
     maxabs_spectrum,
     minmax_spectrum,
     zscore_spectrum,
 )
+from .retrieval import (
+    highpass_retrieval,
+    moving_average,
+    normalized_highpass_retrieval,
+    zero_retrieval,
+)
+from .targets import get_axis, get_measured_spectrum, get_raman_target
 from .transforms import crop_axis_and_signal, interpolate_signal, stack_input_target
 
 __all__ = [

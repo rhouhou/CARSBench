@@ -5,7 +5,9 @@ import sys
 from pathlib import Path
 
 SEEDS = [42, 123, 777]
-OUTPUT_ROOT = "/Volumes/mohamadhjeij1982/Biophotonics-AI/Project-BCARSBench/carsbench_data"
+OUTPUT_ROOT = (
+    "/Volumes/mohamadhjeij1982/Biophotonics-AI/Project-BCARSBench/carsbench_data"
+)
 
 SAMPLES_PER_DOMAIN = 5000
 CHUNK_SIZE = 500
@@ -18,9 +20,7 @@ def main() -> None:
     generator_script = scripts_dir / "01_generate_full_dataset.py"
 
     if not generator_script.exists():
-        raise FileNotFoundError(
-            f"Generator script not found: {generator_script}"
-        )
+        raise FileNotFoundError(f"Generator script not found: {generator_script}")
 
     for seed in SEEDS:
         print(f"\n=== Generating dataset for seed {seed} ===")

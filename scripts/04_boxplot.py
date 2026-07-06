@@ -9,7 +9,6 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 DEFAULT_DOMAINS = [
     "A_typical",
     "B_high_res",
@@ -37,6 +36,7 @@ DEFAULT_NUMERIC_PARAMETERS = [
     ("parameters.resolved_config.axis.num_points", "Number of points", False),
 ]
 
+
 def get_nested(d: dict[str, Any], path: str) -> Any:
     """
     Access nested dict entries using dot notation.
@@ -50,6 +50,7 @@ def get_nested(d: dict[str, Any], path: str) -> Any:
         cur = cur[key]
     return cur
 
+
 def safe_name(text: str) -> str:
     text = text.strip().lower()
     text = text.replace(".", "_")
@@ -58,6 +59,7 @@ def safe_name(text: str) -> str:
     text = re.sub(r"[^a-z0-9_]+", "", text)
     text = re.sub(r"_+", "_", text)
     return text.strip("_")
+
 
 def load_parameter_values(
     data_root: Path,
@@ -72,11 +74,7 @@ def load_parameter_values(
     for seed in seeds:
         for domain in domains:
             metadata_path = (
-                data_root
-                / f"seed_{seed}"
-                / domain
-                / "metadata"
-                / "metadata.jsonl"
+                data_root / f"seed_{seed}" / domain / "metadata" / "metadata.jsonl"
             )
 
             if not metadata_path.exists():
@@ -97,6 +95,7 @@ def load_parameter_values(
                         continue
 
     return values
+
 
 def plot_grouped_boxplots(
     values: dict[str, dict[int, list[float]]],
@@ -163,12 +162,18 @@ def plot_grouped_boxplots(
 
     if log_y:
         positive_vals = [
-            v for domain in domains for seed in seeds for v in values[domain][seed] if v > 0
+            v
+            for domain in domains
+            for seed in seeds
+            for v in values[domain][seed]
+            if v > 0
         ]
         if len(positive_vals) > 0:
             ax.set_yscale("log")
         else:
-            print(f"WARNING: skipped log scale for {title} because no positive values were found.")
+            print(
+                f"WARNING: skipped log scale for {title} because no positive values were found."
+            )
 
     handles = [
         plt.Line2D([0], [0], color=seed_to_color[s], lw=8, label=f"seed {s}")

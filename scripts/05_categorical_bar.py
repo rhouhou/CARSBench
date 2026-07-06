@@ -7,10 +7,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-
 import matplotlib.pyplot as plt
 import numpy as np
-
 
 DEFAULT_DOMAINS = [
     "A_typical",
@@ -65,8 +63,7 @@ def load_categorical_counts(
         categories = sorted list of all observed categories
     """
     counts: dict[str, dict[int, dict[str, int]]] = {
-        domain: {seed: defaultdict(int) for seed in seeds}
-        for domain in domains
+        domain: {seed: defaultdict(int) for seed in seeds} for domain in domains
     }
 
     all_categories: set[str] = set()
@@ -74,11 +71,7 @@ def load_categorical_counts(
     for seed in seeds:
         for domain in domains:
             metadata_path = (
-                data_root
-                / f"seed_{seed}"
-                / domain
-                / "metadata"
-                / "metadata.jsonl"
+                data_root / f"seed_{seed}" / domain / "metadata" / "metadata.jsonl"
             )
 
             if not metadata_path.exists():
@@ -108,8 +101,7 @@ def convert_counts_to_fractions(
     categories: list[str],
 ) -> dict[str, dict[int, dict[str, float]]]:
     fractions: dict[str, dict[int, dict[str, float]]] = {
-        domain: {seed: {} for seed in seeds}
-        for domain in domains
+        domain: {seed: {} for seed in seeds} for domain in domains
     }
 
     for domain in domains:
@@ -155,9 +147,7 @@ def plot_grouped_categorical_bars(
     )
 
     cmap = plt.get_cmap("tab10")
-    category_to_color = {
-        cat: cmap(i % 10) for i, cat in enumerate(categories)
-    }
+    category_to_color = {cat: cmap(i % 10) for i, cat in enumerate(categories)}
 
     for d_idx, domain in enumerate(domains):
         for s_idx, seed in enumerate(seeds):
@@ -196,7 +186,9 @@ def plot_grouped_categorical_bars(
 
     # Seed guide legend
     seed_handles = [
-        plt.Line2D([0], [0], color="black", lw=0, marker="|", markersize=18, label=f"seed {s}")
+        plt.Line2D(
+            [0], [0], color="black", lw=0, marker="|", markersize=18, label=f"seed {s}"
+        )
         for s in seeds
     ]
     ax.legend(

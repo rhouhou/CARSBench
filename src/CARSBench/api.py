@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from typing import Optional, Sequence
+from typing import Sequence
 
+from CARSBench.configs.defaults import get_base_defaults
 from CARSBench.datasets.batch import BatchSimulator
 from CARSBench.datasets.schema import SampleBatch
 from CARSBench.datasets.simulate import SampleSimulator
 from CARSBench.domains import DomainSampler, build_default_registry
-from CARSBench.configs.defaults import get_base_defaults
 
 
 def generate_dataset(
@@ -34,8 +34,7 @@ def generate_dataset(
 
     if domain_name not in registry.names():
         raise ValueError(
-            f"Unknown domain '{domain_name}'. "
-            f"Available: {registry.names()}"
+            f"Unknown domain '{domain_name}'. " f"Available: {registry.names()}"
         )
 
     domain = registry.get(domain_name)
@@ -75,10 +74,7 @@ def generate_multi_domain_dataset(
         seed=seed,
     )
 
-    domain_specs = [
-        sampler.resolve(registry.get(name))
-        for name in domain_names
-    ]
+    domain_specs = [sampler.resolve(registry.get(name)) for name in domain_names]
 
     simulator = SampleSimulator(seed=seed)
     batch_sim = BatchSimulator(simulator)

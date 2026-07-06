@@ -4,16 +4,6 @@ import copy
 from typing import Any, Mapping
 
 from .defaults import get_base_defaults
-from .schemas import (
-    AxisConfig,
-    ResonantConfig,
-    NRBConfig,
-    InstrumentConfig,
-    BaselineConfig,
-    NoiseConfig,
-    DetectorConfig,
-    CalibrationConfig,
-)
 
 
 def merge_nested_dicts(

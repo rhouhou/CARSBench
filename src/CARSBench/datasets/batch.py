@@ -59,7 +59,7 @@ class BatchSimulator:
             all_samples.extend(samples)
 
         return SampleBatch(all_samples)
-    
+
     def simulate_from_domain_resolved_per_sample(
         self,
         domain_cfg: DomainConfig,
@@ -199,7 +199,9 @@ def summarize_batch(batch: SampleBatch) -> dict:
 
     for sample in batch.samples:
         domain_counts[sample.domain_name] = domain_counts.get(sample.domain_name, 0) + 1
-        generators[sample.metadata.generator] = generators.get(sample.metadata.generator, 0) + 1
+        generators[sample.metadata.generator] = (
+            generators.get(sample.metadata.generator, 0) + 1
+        )
         num_points[sample.num_points] = num_points.get(sample.num_points, 0) + 1
 
     return {

@@ -162,7 +162,7 @@ class SpectrumSample:
     def to_numpy_dict(self) -> Dict[str, Any]:
         def _f32(x):
             return np.asarray(x, dtype=np.float32)
-        
+
         out: Dict[str, Any] = {
             "axis": _f32(self.axis),
             "spectrum": _f32(self.spectrum),

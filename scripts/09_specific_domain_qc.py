@@ -9,7 +9,6 @@ from typing import Any
 
 import numpy as np
 
-
 DEFAULT_SEEDS = [42, 123, 777]
 
 
@@ -200,7 +199,9 @@ def main() -> None:
 
     for seed in args.seeds:
         for domain, fn in domains.items():
-            meta_path = data_root / f"seed_{seed}" / domain / "metadata" / "metadata.jsonl"
+            meta_path = (
+                data_root / f"seed_{seed}" / domain / "metadata" / "metadata.jsonl"
+            )
             if not meta_path.exists():
                 print(f"Missing: {meta_path}")
                 continue
@@ -222,7 +223,9 @@ def main() -> None:
     all_keys = set()
     for r in rows_out:
         all_keys.update(r.keys())
-    fieldnames = ["seed", "domain"] + sorted(k for k in all_keys if k not in {"seed", "domain"})
+    fieldnames = ["seed", "domain"] + sorted(
+        k for k in all_keys if k not in {"seed", "domain"}
+    )
 
     output_csv = Path(args.output_csv)
     output_csv.parent.mkdir(parents=True, exist_ok=True)

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Mapping, Optional, Sequence
+from typing import Mapping, Optional
 
 import numpy as np
 
@@ -72,6 +72,7 @@ def sample_random_resonant(
 
     return chi_r
 
+
 def sample_component_resonant(
     axis: np.ndarray,
     rng: np.random.Generator,
@@ -96,7 +97,9 @@ def sample_component_resonant(
         allowed_components = list(allowed_components)
 
     minor_background_max_peaks = int(cfg.get("minor_background_max_peaks", 1))
-    component_weight_concentration = float(cfg.get("component_weight_concentration", 2.0))
+    component_weight_concentration = float(
+        cfg.get("component_weight_concentration", 2.0)
+    )
     global_scale_sigma = float(cfg.get("global_scale_sigma", 0.5))
 
     library = build_default_prototype_library()
@@ -130,14 +133,24 @@ def sample_component_resonant(
             metadata["component_weights"] = list(metadata["mixture_weights"])
 
         if "peak_table" in metadata:
-            metadata["peak_centers"] = [float(p["center"]) for p in metadata["peak_table"]]
-            metadata["peak_widths"] = [float(p["width"]) for p in metadata["peak_table"]]
-            metadata["peak_amplitudes"] = [float(p["amplitude"]) for p in metadata["peak_table"]]
+            metadata["peak_centers"] = [
+                float(p["center"]) for p in metadata["peak_table"]
+            ]
+            metadata["peak_widths"] = [
+                float(p["width"]) for p in metadata["peak_table"]
+            ]
+            metadata["peak_amplitudes"] = [
+                float(p["amplitude"]) for p in metadata["peak_table"]
+            ]
             metadata["num_peaks"] = len(metadata["peak_table"])
 
         if "peak_amplitudes" in metadata:
-            metadata["peak_amplitudes_before_global_scale"] = list(metadata["peak_amplitudes"])
-            metadata["peak_amplitudes"] = [float(scale) * float(a) for a in metadata["peak_amplitudes"]]
+            metadata["peak_amplitudes_before_global_scale"] = list(
+                metadata["peak_amplitudes"]
+            )
+            metadata["peak_amplitudes"] = [
+                float(scale) * float(a) for a in metadata["peak_amplitudes"]
+            ]
 
         if "peak_table" in metadata:
             for peak in metadata["peak_table"]:
@@ -150,7 +163,9 @@ def sample_component_resonant(
         metadata["max_components"] = int(max_components)
         metadata["allowed_components"] = allowed_components
         metadata["minor_background_max_peaks"] = int(minor_background_max_peaks)
-        metadata["component_weight_concentration"] = float(component_weight_concentration)
+        metadata["component_weight_concentration"] = float(
+            component_weight_concentration
+        )
 
         return chi, metadata
 

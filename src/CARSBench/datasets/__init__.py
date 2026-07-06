@@ -1,5 +1,3 @@
-from .schema import SampleBatch, SampleMetadata, SpectrumSample
-from .simulate import SampleSimulator
 from .batch import (
     BatchSimulator,
     concatenate_batches,
@@ -10,7 +8,8 @@ from .batch import (
     summarize_batch,
 )
 from .reader import DatasetReader
-from .writer import DatasetWriter
+from .schema import SampleBatch, SampleMetadata, SpectrumSample
+from .simulate import SampleSimulator
 from .splits import (
     DomainSplit,
     leave_one_domain_out,
@@ -19,6 +18,7 @@ from .splits import (
     validate_split,
     validate_splits,
 )
+from .writer import DatasetWriter
 
 __all__ = [
     "SampleMetadata",

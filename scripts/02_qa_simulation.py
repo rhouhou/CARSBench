@@ -1,15 +1,14 @@
 from __future__ import annotations
 
+import itertools
 import os
 from collections import Counter
-import itertools
 
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.decomposition import PCA
 
 from CARSBench.api import generate_multi_domain_dataset
-
 
 OUTPUT_DIR = "qa_plots"
 DOMAINS = [
@@ -122,11 +121,15 @@ def plot_mean_std_spectrum_per_domain(domain_batches: dict[str, list]) -> None:
 
 
 def plot_raman_vs_bcars(domain_batches: dict[str, list]) -> None:
-    fig, axes = plt.subplots(len(domain_batches), 1, figsize=(8, 2.4 * len(domain_batches)))
+    fig, axes = plt.subplots(
+        len(domain_batches), 1, figsize=(8, 2.4 * len(domain_batches))
+    )
 
     for i, (domain, samples) in enumerate(domain_batches.items()):
         sample = samples[0]
-        axes[i].plot(sample.axis, sample.raman_target, label="Raman target", linewidth=1.5)
+        axes[i].plot(
+            sample.axis, sample.raman_target, label="Raman target", linewidth=1.5
+        )
         axes[i].plot(sample.axis, sample.spectrum, label="BCARS", linewidth=1.5)
         axes[i].set_ylabel(domain)
         if i == 0:
@@ -143,7 +146,9 @@ def plot_pca(batch) -> None:
     pca_samples = [s for s in batch.samples if s.domain_name in PCA_DOMAINS]
     ref_axis = get_common_axis(pca_samples)
 
-    X = np.array([np.interp(ref_axis, s.axis, s.spectrum) for s in pca_samples], dtype=np.float64)
+    X = np.array(
+        [np.interp(ref_axis, s.axis, s.spectrum) for s in pca_samples], dtype=np.float64
+    )
     labels = [s.domain_name for s in pca_samples]
 
     X = X / np.clip(np.linalg.norm(X, axis=1, keepdims=True), 1e-12, None)
@@ -167,7 +172,11 @@ def plot_pca(batch) -> None:
     plt.close()
 
 
-def plot_domain_difference_heatmap(domain_batches: dict[str, list], exclude_domains=None, filename="domain_difference_heatmap.png") -> None:
+def plot_domain_difference_heatmap(
+    domain_batches: dict[str, list],
+    exclude_domains=None,
+    filename="domain_difference_heatmap.png",
+) -> None:
     if exclude_domains is None:
         exclude_domains = []
 
@@ -236,15 +245,33 @@ def main() -> None:
     print("Domain distribution:", Counter([s.domain_name for s in batch.samples]))
     print("Spectrum lengths:", Counter(lengths))
     print("Prototype counts:", Counter(proto_counts))
-    print("Peak count mean/min/max:", float(np.mean(peak_counts)), int(np.min(peak_counts)), int(np.max(peak_counts)))
-    print("Raman vs BCARS corr mean/min/max:", float(np.mean(corrs)), float(np.min(corrs)), float(np.max(corrs)))
+    print(
+        "Peak count mean/min/max:",
+        float(np.mean(peak_counts)),
+        int(np.min(peak_counts)),
+        int(np.max(peak_counts)),
+    )
+    print(
+        "Raman vs BCARS corr mean/min/max:",
+        float(np.mean(corrs)),
+        float(np.min(corrs)),
+        float(np.max(corrs)),
+    )
 
     plot_example_spectra(domain_batches)
     plot_mean_std_spectrum_per_domain(domain_batches)
     plot_raman_vs_bcars(domain_batches)
     plot_pca(batch)
-    plot_domain_difference_heatmap(domain_batches, exclude_domains=None, filename="domain_difference_heatmap_with_E.png")
-    plot_domain_difference_heatmap(domain_batches, exclude_domains=["E_window_shift"], filename="domain_difference_heatmap_without_E.png")
+    plot_domain_difference_heatmap(
+        domain_batches,
+        exclude_domains=None,
+        filename="domain_difference_heatmap_with_E.png",
+    )
+    plot_domain_difference_heatmap(
+        domain_batches,
+        exclude_domains=["E_window_shift"],
+        filename="domain_difference_heatmap_without_E.png",
+    )
 
     print(f"Saved QA plots to: {OUTPUT_DIR}")
 

@@ -97,4 +97,6 @@ def resample_axis(
     if num_points < 2:
         raise ValueError("num_points must be at least 2.")
 
-    return np.linspace(float(axis.min()), float(axis.max()), num_points, dtype=np.float64)
+    return np.linspace(
+        float(axis.min()), float(axis.max()), num_points, dtype=np.float64
+    )

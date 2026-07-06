@@ -4,7 +4,6 @@ from typing import Any, Dict, Mapping, MutableMapping, Sequence
 
 import numpy as np
 
-
 ArrayLike = np.ndarray
 NestedDict = Dict[str, Any]
 MappingLike = Mapping[str, Any]

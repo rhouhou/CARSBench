@@ -19,7 +19,9 @@ def main():
 
     plt.figure(figsize=(8, 4))
     plt.plot(sample.axis, sample.spectrum, label="Simulated CARS/BCARS spectrum")
-    plt.plot(sample.axis, sample.raman_target, label="Raman-equivalent target", alpha=0.8)
+    plt.plot(
+        sample.axis, sample.raman_target, label="Raman-equivalent target", alpha=0.8
+    )
 
     plt.xlabel("Wavenumber (cm$^{-1}$)")
     plt.ylabel("Signal")

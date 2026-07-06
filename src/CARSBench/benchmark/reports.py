@@ -64,11 +64,7 @@ def aggregate_reports(
         }
 
     metric_names = sorted(
-        {
-            metric_name
-            for report in reports
-            for metric_name in report.metrics.keys()
-        }
+        {metric_name for report in reports for metric_name in report.metrics.keys()}
     )
 
     metrics_mean: dict[str, float] = {}

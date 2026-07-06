@@ -6,7 +6,6 @@ from pathlib import Path
 
 import numpy as np
 
-
 DEFAULT_DOMAINS = [
     "A_typical",
     "B_high_res",
@@ -25,7 +24,9 @@ def canonical_axis() -> np.ndarray:
     return np.linspace(400.0, 3200.0, 1024, dtype=np.float64)
 
 
-def interpolate_rows(axis_2d: np.ndarray, y_2d: np.ndarray, target_axis: np.ndarray) -> np.ndarray:
+def interpolate_rows(
+    axis_2d: np.ndarray, y_2d: np.ndarray, target_axis: np.ndarray
+) -> np.ndarray:
     out = np.empty((y_2d.shape[0], target_axis.size), dtype=np.float32)
 
     for i in range(y_2d.shape[0]):
@@ -140,7 +141,11 @@ def summarize_domain_vs_reference(
         "dom_max_std": float(np.max(std_dom)),
         "ref_sharpness": sharpness_metric(Y_ref),
         "dom_sharpness": sharpness_metric(Y_dom),
-        "sharpness_ratio_dom_over_ref": float(sharpness_metric(Y_dom) / sharpness_metric(Y_ref)) if sharpness_metric(Y_ref) not in [0, np.nan] else np.nan,
+        "sharpness_ratio_dom_over_ref": (
+            float(sharpness_metric(Y_dom) / sharpness_metric(Y_ref))
+            if sharpness_metric(Y_ref) not in [0, np.nan]
+            else np.nan
+        ),
         "fp_mean_ref": float(np.nanmean(fp_ref)),
         "fp_mean_dom": float(np.nanmean(fp_dom)),
         "ch_mean_ref": float(np.nanmean(ch_ref)),
@@ -155,7 +160,12 @@ def main() -> None:
     parser.add_argument("--seeds", nargs="*", type=int, default=DEFAULT_SEEDS)
     parser.add_argument("--domains", nargs="*", default=DEFAULT_DOMAINS)
     parser.add_argument("--reference-domain", type=str, default="A_typical")
-    parser.add_argument("--value-key", type=str, default="spectrum", choices=["spectrum", "clean_intensity", "raman_target"])
+    parser.add_argument(
+        "--value-key",
+        type=str,
+        default="spectrum",
+        choices=["spectrum", "clean_intensity", "raman_target"],
+    )
     parser.add_argument("--max-batches", type=int, default=None)
     args = parser.parse_args()
 

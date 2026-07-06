@@ -24,7 +24,7 @@ def polynomial_baseline(
     x = np.linspace(-1.0, 1.0, len(axis))
 
     c0, c1, c2 = coefficients
-    return c0 + c1 * x + c2 * (x ** 2)
+    return c0 + c1 * x + c2 * (x**2)
 
 
 def sample_polynomial_baseline(

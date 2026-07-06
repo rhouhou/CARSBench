@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from pathlib import Path
 import shutil
+from pathlib import Path
+
 import numpy as np
 
 from CARSBench.api import generate_dataset, list_domains
 from CARSBench.datasets.reader import DatasetReader
 from CARSBench.datasets.writer import DatasetWriter
-
 
 TMP_DIR = Path("tmp_smoke_test")
 

@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import argparse
 import json
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 
 DEFAULT_SEEDS = [42, 123, 777]
 G_DOMAIN = "G_biochemical_source"
@@ -28,7 +27,9 @@ def get_nested(d: dict[str, Any], path: str) -> Any:
     return cur
 
 
-def interpolate_rows(axis_2d: np.ndarray, y_2d: np.ndarray, target_axis: np.ndarray) -> np.ndarray:
+def interpolate_rows(
+    axis_2d: np.ndarray, y_2d: np.ndarray, target_axis: np.ndarray
+) -> np.ndarray:
     out = np.empty((y_2d.shape[0], target_axis.size), dtype=np.float32)
 
     for i in range(y_2d.shape[0]):
@@ -104,7 +105,9 @@ def aggregate_component_counts(rows: list[dict[str, Any]]) -> Counter:
     for row in rows:
         comps = get_nested(row, "parameters.resonant_info.selected_components")
         if comps is None:
-            comps = get_nested(row, "parameters.resolved_config.resonant.allowed_components")
+            comps = get_nested(
+                row, "parameters.resolved_config.resonant.allowed_components"
+            )
 
         if comps is None:
             continue
@@ -169,10 +172,14 @@ def plot_raman_overlay(
     fig, ax = plt.subplots(figsize=(10, 6))
 
     ax.plot(axis_g, mean_g, linewidth=2.0, label=f"{G_DOMAIN} (N={n_g})")
-    ax.fill_between(axis_g, mean_g - std_scale * std_g, mean_g + std_scale * std_g, alpha=0.18)
+    ax.fill_between(
+        axis_g, mean_g - std_scale * std_g, mean_g + std_scale * std_g, alpha=0.18
+    )
 
     ax.plot(axis_h, mean_h, linewidth=2.0, label=f"{H_DOMAIN} (N={n_h})")
-    ax.fill_between(axis_h, mean_h - std_scale * std_h, mean_h + std_scale * std_h, alpha=0.18)
+    ax.fill_between(
+        axis_h, mean_h - std_scale * std_h, mean_h + std_scale * std_h, alpha=0.18
+    )
 
     ax.set_title(f"G vs H | seed {seed} | raman_target mean ± {std_scale:.0f} std")
     ax.set_xlabel("Wavenumber (cm$^{-1}$)")
@@ -214,8 +221,12 @@ def plot_component_counts(
     width = 0.36
 
     fig, ax = plt.subplots(figsize=(9, 5))
-    ax.bar(x - width / 2, [g_counts.get(c, 0) for c in categories], width, label=G_DOMAIN)
-    ax.bar(x + width / 2, [h_counts.get(c, 0) for c in categories], width, label=H_DOMAIN)
+    ax.bar(
+        x - width / 2, [g_counts.get(c, 0) for c in categories], width, label=G_DOMAIN
+    )
+    ax.bar(
+        x + width / 2, [h_counts.get(c, 0) for c in categories], width, label=H_DOMAIN
+    )
 
     ax.set_title(f"G vs H | seed {seed} | selected component counts")
     ax.set_xticks(x)
@@ -307,8 +318,12 @@ def plot_peak_source_counts(
     width = 0.36
 
     fig, ax = plt.subplots(figsize=(9, 5))
-    ax.bar(x - width / 2, [g_counts.get(c, 0) for c in categories], width, label=G_DOMAIN)
-    ax.bar(x + width / 2, [h_counts.get(c, 0) for c in categories], width, label=H_DOMAIN)
+    ax.bar(
+        x - width / 2, [g_counts.get(c, 0) for c in categories], width, label=G_DOMAIN
+    )
+    ax.bar(
+        x + width / 2, [h_counts.get(c, 0) for c in categories], width, label=H_DOMAIN
+    )
 
     ax.set_title(f"G vs H | seed {seed} | peak source counts")
     ax.set_xticks(x)
@@ -327,7 +342,9 @@ def plot_peak_source_counts(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-root", type=str, required=True)
-    parser.add_argument("--output-dir", type=str, default="figures/chemistry_validation")
+    parser.add_argument(
+        "--output-dir", type=str, default="figures/chemistry_validation"
+    )
     parser.add_argument("--seeds", nargs="*", type=int, default=DEFAULT_SEEDS)
     parser.add_argument("--max-batches", type=int, default=None)
     parser.add_argument("--std-scale", type=float, default=1.0)

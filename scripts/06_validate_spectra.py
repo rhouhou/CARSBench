@@ -8,7 +8,6 @@ import numpy as np
 
 from CARSBench.datasets.reader import DatasetReader
 
-
 DEFAULT_DOMAINS = [
     "A_typical",
     "B_high_res",
@@ -44,7 +43,9 @@ def interpolate_samples(samples, value_key: str, target_axis: np.ndarray) -> np.
     return np.stack(ys, axis=0)
 
 
-def region_stats(axis: np.ndarray, mean_y: np.ndarray, std_y: np.ndarray, lo: float, hi: float) -> dict:
+def region_stats(
+    axis: np.ndarray, mean_y: np.ndarray, std_y: np.ndarray, lo: float, hi: float
+) -> dict:
     mask = (axis >= lo) & (axis <= hi)
     if not np.any(mask):
         return {
@@ -60,7 +61,9 @@ def region_stats(axis: np.ndarray, mean_y: np.ndarray, std_y: np.ndarray, lo: fl
     }
 
 
-def plot_random_spectra(samples, output_path: Path, title: str, n_show: int, rng_seed: int) -> None:
+def plot_random_spectra(
+    samples, output_path: Path, title: str, n_show: int, rng_seed: int
+) -> None:
     rng = np.random.default_rng(rng_seed)
     n_show = min(n_show, len(samples))
     idx = rng.choice(len(samples), size=n_show, replace=False)
@@ -69,7 +72,7 @@ def plot_random_spectra(samples, output_path: Path, title: str, n_show: int, rng
     for i in idx:
         s = samples[int(i)]
         ax.plot(s.axis, s.spectrum, linewidth=1.0, alpha=0.7)
-        #ax.plot(s.axis, s.raman_target, linewidth=1.0, alpha=0.7)
+        # ax.plot(s.axis, s.raman_target, linewidth=1.0, alpha=0.7)
 
     ax.set_title(title)
     ax.set_xlabel("Wavenumber (cm$^{-1}$)")
@@ -82,7 +85,9 @@ def plot_random_spectra(samples, output_path: Path, title: str, n_show: int, rng
     plt.close(fig)
 
 
-def plot_mean_std(samples, output_path: Path, title: str, value_key: str = "spectrum") -> dict:
+def plot_mean_std(
+    samples, output_path: Path, title: str, value_key: str = "spectrum"
+) -> dict:
     target_axis = canonical_axis()
     Y = interpolate_samples(samples, value_key=value_key, target_axis=target_axis)
 
@@ -91,7 +96,13 @@ def plot_mean_std(samples, output_path: Path, title: str, value_key: str = "spec
 
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot(target_axis, mean_y, linewidth=1.8, label="Mean")
-    ax.fill_between(target_axis, mean_y - 2 * std_y, mean_y + 2 * std_y, alpha=0.25, label="Mean ± 2 std")
+    ax.fill_between(
+        target_axis,
+        mean_y - 2 * std_y,
+        mean_y + 2 * std_y,
+        alpha=0.25,
+        label="Mean ± 2 std",
+    )
 
     ax.set_title(title)
     ax.set_xlabel("Wavenumber (cm$^{-1}$)")
@@ -144,7 +155,9 @@ def main() -> None:
 
             plot_random_spectra(
                 samples=samples,
-                output_path=output_dir / f"seed_{seed}" / f"{domain}_random_spectra.png",
+                output_path=output_dir
+                / f"seed_{seed}"
+                / f"{domain}_random_spectra.png",
                 title=f"{domain} | seed {seed} | random spectra",
                 n_show=args.n_show,
                 rng_seed=seed,

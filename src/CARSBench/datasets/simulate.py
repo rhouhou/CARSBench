@@ -25,6 +25,7 @@ from CARSBench.physics import (
 )
 from CARSBench.utils.random import child_seed, make_rng
 
+
 @dataclass
 class SampleSimulator:
     """
@@ -114,11 +115,15 @@ class SampleSimulator:
                 "family": cfg.get("nrb", {}).get("family", None),
                 "alpha": cfg.get("nrb", {}).get("alpha", None),
                 "phase_model": cfg.get("nrb", {}).get("phase_model", None),
-                "phase_total_change": cfg.get("nrb", {}).get("phase_total_change", None),
+                "phase_total_change": cfg.get("nrb", {}).get(
+                    "phase_total_change", None
+                ),
             },
             "instrument_info": {
                 "psf_fwhm": cfg.get("instrument", {}).get("psf_fwhm", None),
-                "envelope_family": cfg.get("instrument", {}).get("envelope_family", None),
+                "envelope_family": cfg.get("instrument", {}).get(
+                    "envelope_family", None
+                ),
             },
             "noise_info": {
                 "shot_scale": cfg.get("noise", {}).get("shot_scale", None),
@@ -180,7 +185,7 @@ class SampleSimulator:
             samples.append(sample)
 
         return samples
-    
+
     def simulate_domain_samples_resolved_per_sample(
         self,
         domain_cfg: DomainConfig,

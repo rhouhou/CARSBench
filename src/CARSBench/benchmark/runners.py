@@ -33,7 +33,4 @@ def evaluate_predictions(
     ]
 
     keys = metric_list[0].keys()
-    return {
-        key: sum(m[key] for m in metric_list) / len(metric_list)
-        for key in keys
-    }
+    return {key: sum(m[key] for m in metric_list) / len(metric_list) for key in keys}

@@ -77,7 +77,10 @@ class DatasetWriter:
         stacked = batch.stack()
 
         stacked["metadata_json"] = np.array(
-            [json.dumps(sample.metadata.to_dict(), ensure_ascii=False) for sample in batch.samples],
+            [
+                json.dumps(sample.metadata.to_dict(), ensure_ascii=False)
+                for sample in batch.samples
+            ],
             dtype=object,
         )
 
@@ -99,7 +102,9 @@ class DatasetWriter:
 
         with path.open("w", encoding="utf-8") as f:
             for sample in samples:
-                f.write(json.dumps(sample.metadata.to_dict(), ensure_ascii=False) + "\n")
+                f.write(
+                    json.dumps(sample.metadata.to_dict(), ensure_ascii=False) + "\n"
+                )
 
         return path
 

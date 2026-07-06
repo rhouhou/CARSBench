@@ -7,6 +7,7 @@ from typing import Any, Mapping, Optional
 import numpy as np
 
 from CARSBench.utils.random import make_rng
+
 from .base import DomainConfig, DomainSpec
 
 
@@ -140,7 +141,7 @@ class DomainSampler:
             specs.append(spec)
 
         return specs
-    
+
     def resolve_with_overrides(
         self,
         domain: DomainConfig,

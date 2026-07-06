@@ -7,7 +7,6 @@ import numpy as np
 
 from .lineshapes import lorentzian_complex
 
-
 # ============================================================
 # Peak specification
 # ============================================================
@@ -141,7 +140,7 @@ def sample_prototype_variant(
                 "base_width": float(peak.width),
                 "base_amplitude": float(peak.amplitude),
                 "prototype_scale": float(prototype_scale),
-                "presence_prob": float(peak.presence_prob)
+                "presence_prob": float(peak.presence_prob),
             }
         )
 
@@ -155,6 +154,7 @@ def sample_prototype_variant(
             return chi, metadata
 
     return chi
+
 
 def sample_minor_background_peaks(
     axis: np.ndarray,
@@ -204,6 +204,7 @@ def sample_minor_background_peaks(
 
     return chi
 
+
 # ============================================================
 # Mixture engine
 # ============================================================
@@ -223,9 +224,7 @@ def sample_prototype_mixture(
     Generate a correlated Raman spectrum from a mixture of prototypes.
     """
     names = (
-        list(allowed_prototypes)
-        if allowed_prototypes is not None
-        else library.names()
+        list(allowed_prototypes) if allowed_prototypes is not None else library.names()
     )
 
     if len(names) == 0:
@@ -262,7 +261,9 @@ def sample_prototype_mixture(
             for peak in variant_meta["realized_peaks"]:
                 weighted_peak = dict(peak)
                 weighted_peak["mixture_weight"] = float(w)
-                weighted_peak["amplitude_before_mixture_weight"] = float(peak["amplitude"])
+                weighted_peak["amplitude_before_mixture_weight"] = float(
+                    peak["amplitude"]
+                )
                 weighted_peak["amplitude"] = float(w) * float(peak["amplitude"])
                 weighted_peaks.append(weighted_peak)
 
@@ -304,7 +305,9 @@ def sample_prototype_mixture(
             "selected_components": chosen,
             "mixture_weights": [float(w) for w in weights],
             "max_components": int(max_components),
-            "allowed_components": None if allowed_prototypes is None else list(allowed_prototypes),
+            "allowed_components": (
+                None if allowed_prototypes is None else list(allowed_prototypes)
+            ),
             "n_components": int(n_components),
             "component_metadata": component_metadata,
             "minor_background_metadata": minor_meta,
@@ -321,12 +324,12 @@ def sample_prototype_mixture(
         return chi, metadata
 
     chi += sample_minor_background_peaks(
-        axis, 
+        axis,
         rng,
         max_peaks=minor_background_max_peaks,
         amplitude_low=0.01,
         amplitude_high=0.05,
-        )
+    )
     return chi
 
 
@@ -384,11 +387,9 @@ def build_default_prototype_library() -> PrototypeLibrary:
                 PeakSpec(1245, 9, 0.8),
                 PeakSpec(1335, 10, 0.6),
                 PeakSpec(1450, 12, 1.0),
-
                 # Amide I / II region
                 PeakSpec(1660, 14, 1.3),
                 PeakSpec(1675, 14, 0.5, presence_prob=0.4),
-
                 # CH region but less dominant than lipid
                 PeakSpec(2870, 15, 0.9),
                 PeakSpec(2935, 14, 1.2),
@@ -413,7 +414,6 @@ def build_default_prototype_library() -> PrototypeLibrary:
                 PeakSpec(1375, 10, 0.5, presence_prob=0.5),
                 PeakSpec(1485, 11, 0.7),
                 PeakSpec(1578, 12, 0.6),
-
                 # weak CH (important to avoid trivial separation)
                 PeakSpec(2930, 14, 0.3, presence_prob=0.5),
             ],
@@ -435,7 +435,6 @@ def build_default_prototype_library() -> PrototypeLibrary:
                 PeakSpec(1585, 8, 0.9),
                 PeakSpec(1602, 8, 1.5),
                 PeakSpec(1620, 9, 1.0),
-
                 # very weak CH contribution
                 PeakSpec(3050, 12, 0.3, presence_prob=0.5),
             ],

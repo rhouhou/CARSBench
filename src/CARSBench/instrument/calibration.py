@@ -24,7 +24,7 @@ def apply_axis_warp(
     axis = np.asarray(axis, dtype=np.float64)
 
     x = np.linspace(-1.0, 1.0, len(axis))
-    warp = float(warp_amplitude) * (x ** 2 - np.mean(x ** 2))
+    warp = float(warp_amplitude) * (x**2 - np.mean(x**2))
 
     return axis + warp
 

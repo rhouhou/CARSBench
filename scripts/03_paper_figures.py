@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.decomposition import PCA
 
 from CARSBench.api import generate_dataset, generate_multi_domain_dataset
-
 
 OUTPUT_DIR = "paper_figures"
 
@@ -34,8 +34,12 @@ def figure_forward_model_examples() -> None:
 
     fig, axes = plt.subplots(4, 1, figsize=(8, 10), sharex=True)
     for i, sample in enumerate(batch.samples):
-        axes[i].plot(sample.axis, sample.raman_target, label="Raman target", linewidth=2)
-        axes[i].plot(sample.axis, sample.spectrum, label="BCARS measurement", linewidth=2)
+        axes[i].plot(
+            sample.axis, sample.raman_target, label="Raman target", linewidth=2
+        )
+        axes[i].plot(
+            sample.axis, sample.spectrum, label="BCARS measurement", linewidth=2
+        )
         if i == 0:
             axes[i].legend()
 
@@ -54,10 +58,15 @@ def figure_pca_diversity() -> None:
         "G_biochemical_source",
         "H_biochemical_target",
     ]
-    batch = generate_multi_domain_dataset(domain_names=domains, samples_per_domain=200, seed=42)
+    batch = generate_multi_domain_dataset(
+        domain_names=domains, samples_per_domain=200, seed=42
+    )
 
     ref_axis = get_common_axis(batch.samples)
-    X = np.array([np.interp(ref_axis, s.axis, s.spectrum) for s in batch.samples], dtype=np.float64)
+    X = np.array(
+        [np.interp(ref_axis, s.axis, s.spectrum) for s in batch.samples],
+        dtype=np.float64,
+    )
     labels = [s.domain_name for s in batch.samples]
 
     X = X / np.clip(np.linalg.norm(X, axis=1, keepdims=True), 1e-12, None)

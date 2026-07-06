@@ -27,9 +27,7 @@ def raman_response_time(
 
     for omega, gamma, amplitude in zip(omegas, gammas, amplitudes):
         response[mask] += (
-            amplitude
-            * np.exp(-1j * omega * t[mask])
-            * np.exp(-gamma * t[mask])
+            amplitude * np.exp(-1j * omega * t[mask]) * np.exp(-gamma * t[mask])
         )
 
     return response

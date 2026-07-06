@@ -4,11 +4,10 @@ import argparse
 from pathlib import Path
 
 from CARSBench.configs.defaults import get_base_defaults
-from CARSBench.domains import build_default_registry, DomainSampler
 from CARSBench.datasets.batch import BatchSimulator
 from CARSBench.datasets.simulate import SampleSimulator
 from CARSBench.datasets.writer import DatasetWriter
-
+from CARSBench.domains import DomainSampler, build_default_registry
 
 DEFAULT_DOMAINS = [
     "A_typical",
@@ -117,11 +116,12 @@ def main() -> None:
                 "master_seed": args.seed,
                 "resolution_policy": (
                     "axis_fixed_per_domain_except_E_window_shift_where_only_num_points_is_fixed"
-                )
+                ),
             },
         )
 
         print(f"Saved: {domain_root}")
+
 
 # Example Usage
 # python scripts/generate_full_dataset.py --samples-per-domain 5000 --chunk-size 500

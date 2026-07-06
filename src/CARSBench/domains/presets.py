@@ -89,7 +89,12 @@ def make_domain_e_window_shift() -> DomainConfig:
             "axis": {
                 "window_mode": {
                     "dist": "categorical",
-                    "values": ["fingerprint", "ch", "partial_fingerprint", "partial_ch"],
+                    "values": [
+                        "fingerprint",
+                        "ch",
+                        "partial_fingerprint",
+                        "partial_ch",
+                    ],
                     "p": [0.35, 0.35, 0.15, 0.15],
                 },
                 "nu_min": {"dist": "uniform", "low": 500.0, "high": 1200.0},
@@ -119,6 +124,7 @@ def make_domain_f_nrb_family_shift() -> DomainConfig:
         },
     )
 
+
 def make_domain_g_biochemical_source() -> DomainConfig:
     return DomainConfig(
         name="G_biochemical_source",
@@ -132,8 +138,8 @@ def make_domain_g_biochemical_source() -> DomainConfig:
                 "mode": "component",
                 "max_components": 3,
                 "allowed_components": ["lipid", "protein"],
-                "minor_background_max_peaks": 0, # 1 for final benchmark
-                "component_weight_concentration": 3, #2.5 for final benchmark
+                "minor_background_max_peaks": 0,  # 1 for final benchmark
+                "component_weight_concentration": 3,  # 2.5 for final benchmark
             },
         },
     )
@@ -152,11 +158,12 @@ def make_domain_h_biochemical_target() -> DomainConfig:
                 "mode": "component",
                 "max_components": 3,
                 "allowed_components": ["nucleic_acid", "aromatic"],
-                "minor_background_max_peaks": 0, #1for final benchmark
-                "component_weight_concentration": 3,#2.5 for final benchmark
+                "minor_background_max_peaks": 0,  # 1for final benchmark
+                "component_weight_concentration": 3,  # 2.5 for final benchmark
             },
         },
     )
+
 
 def build_default_registry() -> DomainRegistry:
     registry = DomainRegistry()

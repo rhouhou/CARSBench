@@ -4,7 +4,7 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Status](https://img.shields.io/badge/status-alpha-orange)
 ![Project Type](https://img.shields.io/badge/project-scientific%20ML%20benchmark-purple)
-[![CI](https://github.com/rhouhou/CARSBench/actions/workflows/ci.yml/badge.svg)](https://github.com/rhouhou/CARSBench/actions/workflows/ci.yml)
+![CI](https://github.com/rhouhou/CARSBench/actions/workflows/ci.yml/badge.svg)
 
 **CARSBench** is a simulation and benchmarking framework for broadband Coherent Anti-Stokes Raman Scattering (BCARS/CARS) spectroscopy.
 
@@ -40,7 +40,14 @@ This project demonstrates:
 * reproducible synthetic dataset generation
 * Raman-equivalent target generation
 * quality-control workflows for simulated spectra
-* foundations for machine-learning benchmark evaluation
+* baseline evaluation for Raman-retrieval benchmarking
+* automated testing, formatting, linting, and CI
+
+---
+
+## Example output
+
+![Example CARSBench simulated spectrum](docs/assets/example_spectrum.png)
 
 ---
 
@@ -56,6 +63,8 @@ This project demonstrates:
 * Metadata export for simulation parameters
 * Quality-control and visualization scripts
 * Simple benchmark metrics for Raman-retrieval evaluation
+* Lightweight baseline benchmark script
+* Basic unit tests and GitHub Actions CI
 
 ---
 
@@ -63,24 +72,24 @@ This project demonstrates:
 
 CARSBench is currently an **alpha-stage research and portfolio project**.
 
-| Component | Status |
-|---|---|
+| Component                              | Status      |
+| -------------------------------------- | ----------- |
 | Frequency-domain BCARS/CARS simulation | Implemented |
-| Eight domain presets | Implemented |
-| Raman-equivalent target generation | Implemented |
-| Chunked dataset writing | Implemented |
-| Multi-seed generation workflow | Implemented |
-| QC and validation scripts | Implemented |
-| Visualization scripts | Implemented |
-| Baseline benchmark utilities | Implemented |
-| Basic API tests | Implemented |
-| Domain generation tests | Implemented |
-| Reproducibility tests | Implemented |
-| Dataset I/O tests | Implemented |
-| Benchmark metric tests | Implemented |
-| GitHub Actions CI | Implemented |
-| Full ML training benchmark | Planned |
-| Real experimental validation | Planned |
+| Eight domain presets                   | Implemented |
+| Raman-equivalent target generation     | Implemented |
+| Chunked dataset writing                | Implemented |
+| Multi-seed generation workflow         | Implemented |
+| QC and validation scripts              | Implemented |
+| Visualization scripts                  | Implemented |
+| Baseline benchmark utilities           | Implemented |
+| Basic API tests                        | Implemented |
+| Domain generation tests                | Implemented |
+| Reproducibility tests                  | Implemented |
+| Dataset I/O tests                      | Implemented |
+| Benchmark metric tests                 | Implemented |
+| GitHub Actions CI                      | Implemented |
+| Full ML training benchmark             | Planned     |
+| Real experimental validation           | Planned     |
 
 ---
 
@@ -148,22 +157,31 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
+On some macOS/Linux systems, you may need to use `python3` instead of `python`.
+
 Install the package in editable mode:
 
 ```bash
-pip install -e .
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -e .
 ```
 
 For development tools:
 
 ```bash
-pip install -e ".[dev]"
+python -m pip install -e ".[dev]"
 ```
 
-For analysis and plotting scripts, install the additional requirements:
+For development plus analysis and plotting tools:
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -e ".[dev,analysis]"
+```
+
+You can also install the local analysis requirements with:
+
+```bash
+python -m pip install -r requirements.txt
 ```
 
 ---
@@ -173,7 +191,7 @@ pip install -r requirements.txt
 After installation, verify that CARSBench can be imported and that the domain registry is available:
 
 ```bash
-python3 -c "import CARSBench as cb; print(cb.list_domains())"
+python -c "import CARSBench as cb; print(cb.list_domains())"
 ```
 
 Expected output should include the benchmark domains:
@@ -185,7 +203,7 @@ Expected output should include the benchmark domains:
 You can also run the smoke test:
 
 ```bash
-python3 scripts/00_smoke_test.py
+python scripts/00_smoke_test.py
 ```
 
 The smoke test checks that dataset generation, sample writing, batch writing, and reading work correctly.
@@ -328,9 +346,9 @@ python scripts/09_specific_domain_qc.py \
 
 ## Dataset format
 
-For a more detailed explanation of the generated files and array keys, see [`docs/dataset_format.md`](docs/dataset_format.md).
+Generated datasets are written in a chunked format.
 
-Generated datasets are written in a chunked format:
+For a more detailed explanation of the generated files and array keys, see [`docs/dataset_format.md`](docs/dataset_format.md).
 
 ```text
 data/
@@ -396,6 +414,8 @@ Typical QC files include:
 
 The QC workflow is intended to verify that each domain produces the expected type of variation before the dataset is used for ML benchmarking.
 
+See [`qc/README.md`](qc/README.md) for more details.
+
 ---
 
 ## Python API
@@ -441,6 +461,70 @@ angle = spectral_angle(prediction, target)
 
 ---
 
+## Baseline benchmark example
+
+CARSBench includes a lightweight baseline benchmark script:
+
+```bash
+python scripts/12_run_baseline_benchmark.py
+```
+
+This script evaluates simple non-learning baselines across all benchmark domains and saves the results to:
+
+```text
+results/benchmark/baseline_results.csv
+```
+
+The included baselines are intended as sanity checks, not as strong Raman-retrieval methods.
+
+They help verify that:
+
+* datasets can be generated across all domains
+* Raman-equivalent targets are available
+* benchmark metrics can be computed
+* domain-level evaluation outputs can be saved and compared
+
+Typical output metrics include:
+
+| Metric         | Meaning                                                     |
+| -------------- | ----------------------------------------------------------- |
+| RMSE           | Root mean squared error between prediction and Raman target |
+| MAE            | Mean absolute error between prediction and Raman target     |
+| Spectral angle | Shape-based similarity between prediction and Raman target  |
+
+The baseline benchmark provides a simple starting point for future comparisons with stronger retrieval methods, phase-retrieval pipelines, or machine-learning models.
+
+See [`docs/baselines.md`](docs/baselines.md) for more details.
+
+---
+
+## Tests and CI
+
+Run the test suite locally:
+
+```bash
+python -m pytest
+```
+
+Run formatting and linting checks:
+
+```bash
+python -m black --check src scripts tests
+python -m ruff check src scripts tests
+```
+
+Apply formatting locally:
+
+```bash
+python -m black src scripts tests
+python -m ruff check src scripts tests --fix
+python -m black src scripts tests
+```
+
+GitHub Actions runs tests, formatting checks, linting checks, and the smoke test on each push and pull request.
+
+---
+
 ## Repository structure
 
 ```text
@@ -450,6 +534,9 @@ CARSBench/
 
   qc/
     Quality-control CSV outputs
+
+  results/
+    Lightweight benchmark summaries and result documentation
 
   scripts/
     00_smoke_test.py
@@ -463,6 +550,8 @@ CARSBench/
     07_validate_chemistry_GH.py
     08_general_domain_qc.py
     09_specific_domain_qc.py
+    11_make_readme_figures.py
+    12_run_baseline_benchmark.py
 
   src/CARSBench/
     benchmark/
@@ -497,6 +586,9 @@ CARSBench/
 
     viz/
       Plotting and visualization helpers
+
+  tests/
+    Unit and integration tests for API, domains, metrics, reproducibility, and I/O
 ```
 
 ---
@@ -517,6 +609,19 @@ For detailed seed recommendations, generation commands, and reporting practices,
 
 ---
 
+## Documentation
+
+Additional documentation is available in the [`docs/`](docs/) folder.
+
+Recommended pages:
+
+* [`docs/domains.md`](docs/domains.md)
+* [`docs/dataset_format.md`](docs/dataset_format.md)
+* [`docs/reproducibility.md`](docs/reproducibility.md)
+* [`docs/baselines.md`](docs/baselines.md)
+
+---
+
 ## Limitations
 
 CARSBench is a simulation and benchmarking framework. It is intended for research, education, and portfolio demonstration.
@@ -526,57 +631,10 @@ Current limitations include:
 * The simulator is not a substitute for experimental validation.
 * The generated spectra are synthetic and depend on the assumptions in the simulation model.
 * Full ML training pipelines are not yet included.
-* Unit tests and CI are planned as next improvements.
 * Real-data validation is planned but not yet part of the core benchmark.
+* Benchmark results should be interpreted as simulation-based evaluation, not experimental proof.
 
 This project is **not intended for clinical diagnosis, medical decision-making, or deployment in real healthcare settings**.
-
----
-
-## Documentation
-
-Additional documentation is available in the [`docs/`](docs/) folder.
-
-Recommended pages:
-
-- [`docs/domains.md`](docs/domains.md)
-- [`docs/dataset_format.md`](docs/dataset_format.md)
-- [`docs/reproducibility.md`](docs/reproducibility.md)
-
----
-
-## Baseline benchmark example
-
-CARSBench includes a lightweight baseline benchmark script:
-
-```bash
-python scripts/12_run_baseline_benchmark.py
-```
-
-This script evaluates simple non-learning baselines across all benchmark domains and saves the results to:
-
-```text
-results/benchmark/baseline_results.csv
-```
-
-The included baselines are intended as sanity checks, not as strong Raman-retrieval methods.
-
-They help verify that:
-
-* datasets can be generated across all domains
-* Raman-equivalent targets are available
-* benchmark metrics can be computed
-* domain-level evaluation outputs can be saved and compared
-
-Typical output metrics include:
-
-| Metric         | Meaning                                                     |
-| -------------- | ----------------------------------------------------------- |
-| RMSE           | Root mean squared error between prediction and Raman target |
-| MAE            | Mean absolute error between prediction and Raman target     |
-| Spectral angle | Shape-based similarity between prediction and Raman target  |
-
-The baseline benchmark provides a simple starting point for future comparisons with stronger retrieval methods, phase-retrieval pipelines, or machine-learning models.
 
 ---
 
@@ -585,50 +643,20 @@ The baseline benchmark provides a simple starting point for future comparisons w
 Planned improvements include:
 
 * Expand test coverage for simulation physics, domain presets, and benchmark tasks
-* Add smoke-test execution to GitHub Actions CI
-* Add documentation pages for domain definitions and dataset format
-* Add example figures to the README
-* Add baseline benchmark results across domains
+* Add stronger baseline benchmark methods
 * Add simple ML baselines for Raman-retrieval evaluation
 * Add calibration and error-analysis plots
+* Add example cross-domain benchmark reports
 * Add integration examples with `prCARS` and `CARSGuard`
 * Add real-data comparison workflows
 * Add optional experiment tracking with MLflow or Weights & Biases
-
----
-
-## Citation
-
-If you use CARSBench in research or educational work, please cite:
-
-```bibtex
-@misc{carsbench2026,
-  title={CARSBench: A Simulation and Domain-Generalization Benchmark for BCARS/CARS Spectroscopy},
-  author={Houhou, Rola},
-  year={2026},
-  note={Alpha research software}
-}
-```
+* Add lightweight documentation pages for API usage
 
 ---
 
 ## Changelog
 
 See [`CHANGELOG.md`](CHANGELOG.md) for version history.
-
----
-
-## Contributing
-
-Contributions, suggestions, and documentation improvements are welcome.
-
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for development setup, testing, formatting, and contribution guidelines.
-
----
-
-## License
-
-This project is licensed under the MIT License.
 
 ---
 
@@ -644,3 +672,10 @@ If you use CARSBench in research, education, or benchmarking work, please cite i
   note={Alpha research software},
   url={https://github.com/rhouhou/CARSBench}
 }
+```
+
+---
+
+## License
+
+This project is licensed under the MIT License.

@@ -172,7 +172,8 @@ def plot_grouped_boxplots(
             ax.set_yscale("log")
         else:
             print(
-                f"WARNING: skipped log scale for {title} because no positive values were found."
+                "WARNING: skipped log scale for"
+                f"{title} because no positive values were found."
             )
 
     handles = [

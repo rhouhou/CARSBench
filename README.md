@@ -4,6 +4,7 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Status](https://img.shields.io/badge/status-alpha-orange)
 ![Project Type](https://img.shields.io/badge/project-scientific%20ML%20benchmark-purple)
+[![CI](https://github.com/rhouhou/CARSBench/actions/workflows/ci.yml/badge.svg)](https://github.com/rhouhou/CARSBench/actions/workflows/ci.yml)
 
 **CARSBench** is a simulation and benchmarking framework for broadband Coherent Anti-Stokes Raman Scattering (BCARS/CARS) spectroscopy.
 

@@ -11,7 +11,8 @@ def _base_domain_tags(*extra: str) -> tuple[str, ...]:
 def make_domain_a_typical() -> DomainConfig:
     return DomainConfig(
         name="A_typical",
-        description="Typical bCARS acquisition with moderate resolution, moderate NRB, and moderate noise.",
+        description="Typical bCARS acquisition with moderate resolution, "
+        "moderate NRB, and moderate noise.",
         tags=_base_domain_tags("typical"),
         overrides={
             "axis": {
@@ -27,7 +28,8 @@ def make_domain_a_typical() -> DomainConfig:
 def make_domain_b_high_res() -> DomainConfig:
     return DomainConfig(
         name="B_high_res",
-        description="Careful acquisition with higher spectral resolution, stronger counts, and lower artifact rate.",
+        description="Careful acquisition with higher spectral resolution, "
+        "stronger counts, and lower artifact rate.",
         tags=_base_domain_tags("high_res"),
         overrides={
             "instrument": {
@@ -45,7 +47,8 @@ def make_domain_b_high_res() -> DomainConfig:
 def make_domain_c_low_res_noisy() -> DomainConfig:
     return DomainConfig(
         name="C_low_res_noisy",
-        description="Lower resolution, lower counts, and stronger detector noise/artifacts.",
+        description="Lower resolution, lower counts, and stronger detector "
+        "noise/artifacts.",
         tags=_base_domain_tags("low_res", "noisy"),
         overrides={
             "instrument": {
@@ -69,7 +72,8 @@ def make_domain_c_low_res_noisy() -> DomainConfig:
 def make_domain_d_calibration_shift() -> DomainConfig:
     return DomainConfig(
         name="D_calibration_shift",
-        description="Domain with stronger axis offset and wavenumber warping to simulate calibration mismatch.",
+        description="Domain with stronger axis offset and wavenumber warping "
+        "to simulate calibration mismatch.",
         tags=_base_domain_tags("calibration_shift"),
         overrides={
             "calibration": {
@@ -83,7 +87,8 @@ def make_domain_d_calibration_shift() -> DomainConfig:
 def make_domain_e_window_shift() -> DomainConfig:
     return DomainConfig(
         name="E_window_shift",
-        description="Different spectral windows and lower point counts, including fingerprint-only and CH-only settings.",
+        description="Different spectral windows and lower point counts, including "
+        "fingerprint-only and CH-only settings.",
         tags=_base_domain_tags("window_shift"),
         overrides={
             "axis": {
@@ -108,7 +113,8 @@ def make_domain_e_window_shift() -> DomainConfig:
 def make_domain_f_nrb_family_shift() -> DomainConfig:
     return DomainConfig(
         name="F_nrb_family_shift",
-        description="NRB-family shift with stronger exponential tilt and larger phase variation.",
+        description="NRB-family shift with stronger exponential tilt and larger "
+        "phase variation.",
         tags=_base_domain_tags("nrb_shift"),
         overrides={
             "nrb": {
@@ -129,8 +135,9 @@ def make_domain_g_biochemical_source() -> DomainConfig:
     return DomainConfig(
         name="G_biochemical_source",
         description=(
-            "Chemistry-shift source domain dominated by lipid/protein prototype mixtures "
-            "under otherwise typical BCARS acquisition conditions."
+            "Chemistry-shift source domain dominated by lipid/protein "
+            "prototype mixtures under otherwise typical BCARS acquisition "
+            "conditions."
         ),
         tags=_base_domain_tags("chemistry_shift", "source"),
         overrides={
@@ -149,8 +156,9 @@ def make_domain_h_biochemical_target() -> DomainConfig:
     return DomainConfig(
         name="H_biochemical_target",
         description=(
-            "Chemistry-shift target domain enriched in nucleic-acid/aromatic prototype mixtures "
-            "under otherwise typical BCARS acquisition conditions."
+            "Chemistry-shift target domain enriched in nucleic-acid/aromatic "
+            "prototype mixtures under otherwise typical BCARS acquisition "
+            "conditions."
         ),
         tags=_base_domain_tags("chemistry_shift", "target"),
         overrides={

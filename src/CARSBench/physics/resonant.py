@@ -205,7 +205,7 @@ def sample_resonant(
         )
 
     if mode == "random":
-        chi = sample_random_resonant(
+        return sample_random_resonant(
             axis=axis,
             rng=rng,
             cfg=cfg,

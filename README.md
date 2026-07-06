@@ -601,3 +601,18 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for development setup, testing, formatt
 ## License
 
 This project is licensed under the MIT License.
+
+---
+
+## Citation
+
+If you use CARSBench in research, education, or benchmarking work, please cite it using the metadata in [`CITATION.cff`](CITATION.cff).
+
+```bibtex
+@misc{carsbench2026,
+  title={CARSBench: A Simulation and Domain-Generalization Benchmark for BCARS/CARS Spectroscopy},
+  author={Houhou, Rola},
+  year={2026},
+  note={Alpha research software},
+  url={https://github.com/rhouhou/CARSBench}
+}

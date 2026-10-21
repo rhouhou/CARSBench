@@ -42,16 +42,17 @@ These checks help confirm that generated spectra are usable before running bench
 
 Domain-specific QC checks whether each benchmark domain shows the expected type of shift.
 
-| Domain                 | Expected QC behavior                                       |
-| ---------------------- | ---------------------------------------------------------- |
-| `A_typical`            | Serves as the reference domain                             |
-| `B_high_res`           | Should show sharper spectral features than typical spectra |
-| `C_low_res_noisy`      | Should show stronger degradation or noise                  |
-| `D_calibration_shift`  | Should show spectral-axis shift or warp                    |
-| `E_window_shift`       | Should show different spectral-window coverage             |
-| `F_nrb_family_shift`   | Should show altered non-resonant-background behavior       |
-| `G_biochemical_source` | Should reflect source biochemical composition              |
-| `H_biochemical_target` | Should reflect shifted target biochemical composition      |
+| Domain | Expected behavior |
+|---|---|
+| `A_typical` | Reference acquisition |
+| `B_high_res` | Sharper spectral features due to higher resolution |
+| `C_low_res` | Broader spectral features due to lower resolution |
+| `D_high_noise` | Stronger stochastic measurement degradation |
+| `E_calibration_shift` | Spectral-axis offset or warping |
+| `F_window_shift` | Changed or partial spectral coverage |
+| `G_nrb_family_shift` | Altered NRB functional shape |
+| `H_biochemical_source` | Source biochemical composition |
+| `I_biochemical_target` | Shifted target biochemical composition |
 
 ---
 

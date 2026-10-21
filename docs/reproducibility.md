@@ -53,32 +53,35 @@ data/
     seed_42/
       A_typical/
       B_high_res/
-      C_low_res_noisy/
-      D_calibration_shift/
-      E_window_shift/
-      F_nrb_family_shift/
-      G_biochemical_source/
-      H_biochemical_target/
+      C_low_res/
+      D_high_noise/
+      E_calibration_shift/
+      F_window_shift/
+      G_nrb_family_shift/
+      H_biochemical_source/
+      I_biochemical_target/
 
     seed_123/
       A_typical/
       B_high_res/
-      C_low_res_noisy/
-      D_calibration_shift/
-      E_window_shift/
-      F_nrb_family_shift/
-      G_biochemical_source/
-      H_biochemical_target/
+      C_low_res/
+      D_high_noise/
+      E_calibration_shift/
+      F_window_shift/
+      G_nrb_family_shift/
+      H_biochemical_source/
+      I_biochemical_target/
 
     seed_777/
       A_typical/
       B_high_res/
-      C_low_res_noisy/
-      D_calibration_shift/
-      E_window_shift/
-      F_nrb_family_shift/
-      G_biochemical_source/
-      H_biochemical_target/
+      C_low_res/
+      D_high_noise/
+      E_calibration_shift/
+      F_window_shift/
+      G_nrb_family_shift/
+      H_biochemical_source/
+      I_biochemical_target/
 ```
 
 This structure makes it easier to compare the same domain across different seeds.

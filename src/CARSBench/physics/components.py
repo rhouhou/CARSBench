@@ -144,14 +144,14 @@ def sample_prototype_variant(
             }
         )
 
-        if return_metadata:
-            metadata = {
-                "prototype_name": prototype.name,
-                "prototype_scale": float(prototype_scale),
-                "num_realized_peaks": len(realized_peaks),
-                "realized_peaks": realized_peaks,
-            }
-            return chi, metadata
+    if return_metadata:
+        metadata = {
+            "prototype_name": prototype.name,
+            "prototype_scale": float(prototype_scale),
+            "num_realized_peaks": len(realized_peaks),
+            "realized_peaks": realized_peaks,
+        }
+        return chi, metadata
 
     return chi
 

@@ -52,11 +52,13 @@ def figure_pca_diversity() -> None:
     domains = [
         "A_typical",
         "B_high_res",
-        "C_low_res_noisy",
-        "D_calibration_shift",
-        "F_nrb_family_shift",
-        "G_biochemical_source",
-        "H_biochemical_target",
+        "C_low_res",
+        "D_high_noise",
+        "E_calibration_shift",
+        "F_window_shift",
+        "G_nrb_family_shift",
+        "H_biochemical_source",
+        "I_biochemical_target",
     ]
     batch = generate_multi_domain_dataset(
         domain_names=domains, samples_per_domain=200, seed=42
@@ -90,11 +92,13 @@ def figure_mean_std_domains() -> None:
     domains = [
         "A_typical",
         "B_high_res",
-        "C_low_res_noisy",
-        "D_calibration_shift",
-        "F_nrb_family_shift",
-        "G_biochemical_source",
-        "H_biochemical_target",
+        "C_low_res",
+        "D_high_noise",
+        "E_calibration_shift",
+        "F_window_shift",
+        "G_nrb_family_shift",
+        "H_biochemical_source",
+        "I_biochemical_target",
     ]
     domain_batches = {
         d: generate_dataset(num_samples=100, domain_name=d, seed=42).samples

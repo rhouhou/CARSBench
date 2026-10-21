@@ -6,7 +6,10 @@ from CARSBench.configs.defaults import get_base_defaults
 from CARSBench.datasets.batch import BatchSimulator
 from CARSBench.datasets.schema import SampleBatch
 from CARSBench.datasets.simulate import SampleSimulator
-from CARSBench.domains import DomainSampler, build_default_registry
+from CARSBench.domains import (
+    DomainSampler,
+    build_default_registry,
+)
 
 
 def generate_dataset(
@@ -15,43 +18,58 @@ def generate_dataset(
     seed: int = 42,
 ) -> SampleBatch:
     """
-    Generate a small dataset from a single domain.
+    Generate a dataset from a single benchmark domain.
+
+    Stochastic domain parameters are resolved independently for each
+    sample while domain-level axis constraints remain controlled.
 
     Parameters
     ----------
     num_samples:
         Number of spectra to generate.
+
     domain_name:
-        Name of benchmark domain.
+        Name of the benchmark domain.
+
     seed:
-        Random seed.
+        Global random seed controlling reproducible generation.
 
     Returns
     -------
     SampleBatch
+        Generated spectra and associated metadata.
     """
     registry = build_default_registry()
 
     if domain_name not in registry.names():
         raise ValueError(
-            f"Unknown domain '{domain_name}'. " f"Available: {registry.names()}"
+            f"Unknown domain '{domain_name}'. "
+            f"Available: {registry.names()}"
         )
 
-    domain = registry.get(domain_name)
+    domain_cfg = registry.get(
+        domain_name
+    )
 
-    sampler = DomainSampler(
+    domain_sampler = DomainSampler(
         base_defaults=get_base_defaults(),
         seed=seed,
     )
 
-    domain_spec = sampler.resolve(domain)
+    simulator = SampleSimulator(
+        seed=seed
+    )
 
-    simulator = SampleSimulator(seed=seed)
-    batch_sim = BatchSimulator(simulator)
+    batch_sim = BatchSimulator(
+        simulator
+    )
 
-    batch = batch_sim.simulate_from_domain(
-        domain_spec=domain_spec,
-        num_samples=num_samples,
+    batch = (
+        batch_sim.simulate_from_domain_resolved_per_sample(
+            domain_cfg=domain_cfg,
+            domain_sampler=domain_sampler,
+            num_samples=num_samples,
+        )
     )
 
     return batch
@@ -63,28 +81,57 @@ def generate_multi_domain_dataset(
     seed: int = 42,
 ) -> SampleBatch:
     """
-    Generate a dataset across multiple domains.
+    Generate a dataset containing multiple benchmark domains.
 
-    Useful for domain-shift experiments.
+    Each sample receives an independently resolved stochastic
+    configuration while respecting the fixed constraints of its
+    corresponding domain.
     """
     registry = build_default_registry()
 
-    sampler = DomainSampler(
+    for name in domain_names:
+        if name not in registry.names():
+            raise ValueError(
+                f"Unknown domain '{name}'. "
+                f"Available: {registry.names()}"
+            )
+
+    domain_sampler = DomainSampler(
         base_defaults=get_base_defaults(),
         seed=seed,
     )
 
-    domain_specs = [sampler.resolve(registry.get(name)) for name in domain_names]
-
-    simulator = SampleSimulator(seed=seed)
-    batch_sim = BatchSimulator(simulator)
-
-    batch = batch_sim.simulate_from_domains(
-        domain_specs=domain_specs,
-        samples_per_domain=samples_per_domain,
+    simulator = SampleSimulator(
+        seed=seed
     )
 
-    return batch
+    batch_sim = BatchSimulator(
+        simulator
+    )
+
+    all_samples = []
+
+    for domain_name in domain_names:
+        domain_cfg = registry.get(
+            domain_name
+        )
+
+        batch = (
+            batch_sim.simulate_from_domain_resolved_per_sample(
+                domain_cfg=domain_cfg,
+                domain_sampler=domain_sampler,
+                num_samples=samples_per_domain,
+                id_prefix=domain_name,
+            )
+        )
+
+        all_samples.extend(
+            batch.samples
+        )
+
+    return SampleBatch(
+        all_samples
+    )
 
 
 def list_domains() -> list[str]:
@@ -92,4 +139,5 @@ def list_domains() -> list[str]:
     List available benchmark domains.
     """
     registry = build_default_registry()
+
     return registry.names()

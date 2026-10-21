@@ -16,6 +16,11 @@ from .resonant import (
     sample_random_resonant,
     sample_resonant,
 )
+from .scaling import (
+    resonant_to_nrb_ratio,
+    scale_resonant_to_nrb_ratio,
+)
+
 from .targets import imag_chi_r, magnitude_chi_r, real_chi_r
 
 __all__ = [

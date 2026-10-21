@@ -4,11 +4,14 @@ from .baseline import (
     polynomial_baseline,
     sample_polynomial_baseline,
     sinusoidal_baseline,
+    build_electronic_baseline,
+    build_optical_background,
 )
 from .calibration import (
     apply_axis_warp,
     apply_calibration_distortion,
     apply_global_shift,
+    resample_miscalibrated_spectrum,
 )
 from .detector import (
     apply_detector_model,

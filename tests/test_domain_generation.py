@@ -5,12 +5,13 @@ def test_all_domains_generate_samples():
     domains = [
         "A_typical",
         "B_high_res",
-        "C_low_res_noisy",
-        "D_calibration_shift",
-        "E_window_shift",
-        "F_nrb_family_shift",
-        "G_biochemical_source",
-        "H_biochemical_target",
+        "C_low_res",
+        "D_high_noise",
+        "E_calibration_shift",
+        "F_window_shift",
+        "G_nrb_family_shift",
+        "H_biochemical_source",
+        "I_biochemical_target",
     ]
 
     for domain_name in domains:

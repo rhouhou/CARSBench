@@ -57,6 +57,7 @@ tmp*/
 !docs/assets/*.png
 !docs/assets/*.pdf
 !docs/assets/*.svg
+docs/*.docx
 
 # Keep lightweight results documentation
 !results/

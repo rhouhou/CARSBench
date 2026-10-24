@@ -1,0 +1,34 @@
+{
+  "dataset_seed": 42,
+  "device": "mps",
+  "git_commit": "cc35e9eeb14a20acaaf59832bfef94925156b41b",
+  "id_test": {
+    "num_samples": 5000,
+    "start_index": 110000
+  },
+  "model_seed": 101,
+  "ood": {
+    "domains": [
+      "B_high_res",
+      "C_low_res",
+      "D_high_noise",
+      "E_calibration_shift",
+      "F_window_shift",
+      "G_system_response_shift",
+      "J_compound_acquisition"
+    ],
+    "num_samples_per_domain": 5000,
+    "start_index": 0
+  },
+  "protocol_sha256": {
+    "carsbench_v1_baseline_protocol.json": "e7fbb4d85ba43af566a090d3bc3dc008ccd2ce01c67767bbe561f172ab7f3891",
+    "carsbench_v1_scale_study.json": "9684c9f76d125c1cf20b72d05e931a63e415baaac6930f70d6d71fa4416d99dd"
+  },
+  "source_domain": "A_typical",
+  "track": "acquisition",
+  "train_size": 5000,
+  "validation": {
+    "num_samples": 5000,
+    "start_index": 100000
+  }
+}

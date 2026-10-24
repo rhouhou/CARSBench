@@ -1,0 +1,89 @@
+{
+  "benchmark_name": "CARSBench",
+  "benchmark_version": "1.0.0",
+  "study": "training_set_size_convergence",
+  "status": "provisional",
+
+  "dataset_seed": 42,
+
+  "source_domains": [
+    "A_typical",
+    "H_biochemical_source"
+  ],
+
+  "candidate_train_sizes": [
+    5000,
+    10000,
+    25000,
+    50000,
+    100000
+  ],
+
+  "nested_training_sets": true,
+
+  "training_index_rule": {
+    "start_index": 0,
+    "description": "For training size N, use source samples with indices [0, N)."
+  },
+
+  "fixed_validation": {
+    "start_index": 100000,
+    "num_samples": 5000
+  },
+
+  "fixed_id_test": {
+    "start_index": 110000,
+    "num_samples": 5000
+  },
+
+  "pilot_ood_test_size": 5000,
+
+  "pilot_ood_domains": {
+    "A_typical": [
+      "B_high_res",
+      "C_low_res",
+      "D_high_noise",
+      "E_calibration_shift",
+      "F_window_shift",
+      "G_system_response_shift",
+      "J_compound_acquisition"
+    ],
+
+    "H_biochemical_source": [
+      "I_biochemical_target",
+      "K_joint_ood"
+    ]
+  },
+
+  "pilot_ood_index_range": {
+    "start_index": 0,
+    "num_samples": 5000
+  },
+
+  "training_repetitions": {
+    "num_model_seeds": 3,
+    "model_seeds": [
+      101,
+      202,
+      303
+    ]
+  },
+
+  "selection_rule": {
+    "goal": "Choose the smallest training-set size whose performance is effectively saturated.",
+    "compare_against_next_larger_size": true,
+    "evaluate_on": [
+      "source_validation",
+      "source_id_test",
+      "ood_targets"
+    ],
+    "final_thresholds_to_be_defined_after_baseline_metrics_are_frozen": true
+  },
+
+  "notes": [
+    "All candidate training sets are nested, so the 5000-sample training set is contained in the 10000-sample set, and so on.",
+    "Validation and test sets are identical for every training-set-size experiment.",
+    "Dataset generation seed is fixed while model-training seeds vary.",
+    "The scale study determines the final v1 dataset size; 100000 source training samples are an upper candidate, not a required final size."
+  ]
+}

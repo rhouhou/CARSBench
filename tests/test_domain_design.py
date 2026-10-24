@@ -42,3 +42,95 @@ def test_reference_spectral_axis():
     assert axis["nu_min"] == 400.0
     assert axis["nu_max"] == 3200.0
     assert axis["num_points"] == 1024
+
+def test_high_noise_domain_uses_lower_photon_counts():
+    defaults = get_base_defaults()
+    registry = build_default_registry()
+
+    reference_noise = defaults["noise"]
+
+    high_noise = registry.get(
+        "D_high_noise"
+    ).overrides["noise"]
+
+    reference_scale = reference_noise[
+        "photoelectrons_per_intensity_unit"
+    ]
+
+    high_noise_scale = high_noise[
+        "photoelectrons_per_intensity_unit"
+    ]
+
+    assert (
+        high_noise_scale["high"]
+        <= reference_scale["low"]
+    )
+
+
+def test_high_noise_domain_inherits_reference_read_noise():
+    defaults = get_base_defaults()
+    registry = build_default_registry()
+
+    reference_read_noise = defaults[
+        "noise"
+    ]["read_noise_electrons"]
+
+    high_noise_overrides = registry.get(
+        "D_high_noise"
+    ).overrides["noise"]
+
+    assert "read_noise_electrons" not in high_noise_overrides
+
+    assert reference_read_noise == 0.7
+
+def test_reference_has_no_calibration_error():
+    defaults = get_base_defaults()
+
+    calibration = defaults[
+        "calibration"
+    ]
+
+    assert calibration["shift_cm1"] == 0.0
+    assert calibration["warp_cm1"] == 0.0
+
+
+def test_calibration_shift_domain_changes_only_calibration():
+    registry = build_default_registry()
+
+    calibration = registry.get(
+        "E_calibration_shift"
+    ).overrides["calibration"]
+
+    assert calibration[
+        "shift_cm1"
+    ]["low"] == -3.0
+
+    assert calibration[
+        "shift_cm1"
+    ]["high"] == 3.0
+
+    assert calibration[
+        "warp_cm1"
+    ]["low"] == -4.0
+
+    assert calibration[
+        "warp_cm1"
+    ]["high"] == 4.0
+
+def test_system_response_shift_does_not_modify_nrb():
+    registry = build_default_registry()
+
+    domain = registry.get(
+        "G_system_response_shift"
+    )
+
+    assert "nrb" not in domain.overrides
+
+    assert "instrument" in domain.overrides
+
+    assert (
+        domain.overrides[
+            "instrument"
+        ]["envelope_family"]
+        == "poly"
+    )

@@ -192,7 +192,7 @@ def main() -> None:
     domains = {
         "E_calibration_shift": summarize_D,
         "F_window_shift": summarize_E,
-        "G_nrb_family_shift": summarize_F,
+        "G_system_response_shift": summarize_F,
         "H_biochemical_source": summarize_GH,
         "I_biochemical_target": summarize_GH,
     }

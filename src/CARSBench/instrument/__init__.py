@@ -29,8 +29,8 @@ from .envelope import (
 from .noise import (
     apply_read_noise,
     apply_shot_noise,
-    apply_spikes,
     build_noise,
+    expected_photoelectrons,
 )
 from .psf import apply_psf, fwhm_to_sigma, gaussian_kernel1d
 
@@ -57,7 +57,7 @@ __all__ = [
     "sinusoidal_baseline",
     "apply_read_noise",
     "apply_shot_noise",
-    "apply_spikes",
+    "expected_photoelectrons",
     "build_noise",
     "apply_detector_model",
     "clip_signal",

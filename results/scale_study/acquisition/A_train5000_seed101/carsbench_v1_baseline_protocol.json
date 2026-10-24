@@ -1,0 +1,133 @@
+{
+  "benchmark_name": "CARSBench",
+  "benchmark_version": "1.0.0",
+  "protocol_name": "baseline_residual_cnn",
+  "protocol_version": "1.0.0",
+  "status": "freeze_candidate",
+
+  "model": {
+    "architecture": "CARSBaselineCNN",
+    "input_channels": [
+      "measured_cars_bcars_spectrum",
+      "observation_mask"
+    ],
+    "output": "predicted_Im_chi_R",
+    "hidden_channels": 64,
+    "num_residual_blocks": 6,
+    "kernel_size": 7
+  },
+
+  "normalization": {
+    "scope": "source_training_subset_only",
+
+    "spectrum": {
+      "method": "global_scalar_zscore",
+      "statistics": [
+        "mean",
+        "population_standard_deviation"
+      ],
+      "statistics_use_only_observed_input_points": true,
+      "unobserved_values_after_normalization": 0.0
+    },
+
+    "observation_mask": {
+      "method": "none",
+      "values": [
+        0.0,
+        1.0
+      ]
+    },
+
+    "target": {
+      "method": "global_scalar_zscore",
+      "statistics": [
+        "mean",
+        "population_standard_deviation"
+      ],
+      "statistics_use_full_target_grid": true
+    },
+
+    "ood_policy": {
+      "fit_statistics_on_ood_data": false,
+      "reuse_source_training_statistics": true
+    },
+
+    "scale_study_policy": {
+      "fit_statistics_separately_for_each_training_size": true,
+      "reason": "Normalization is treated as part of the training procedure and may use only the samples available to that training run."
+    }
+  },
+
+  "optimization": {
+    "loss": "mean_squared_error_on_normalized_target",
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 64,
+    "maximum_epochs": 100,
+    "gradient_clip_norm": 1.0,
+    "learning_rate_scheduler": null
+  },
+
+  "early_stopping": {
+    "enabled": true,
+    "monitored_quantity": "source_validation_normalized_mse",
+    "mode": "min",
+    "patience_epochs": 10,
+    "minimum_delta": 0.00001,
+    "restore_best_model": true,
+    "ood_data_used_for_stopping": false
+  },
+
+  "data_order": {
+    "method": "chunk_aware_shuffle",
+    "shuffle_chunks": true,
+    "shuffle_within_chunks": true,
+    "epoch_seed_rule": "model_seed_plus_epoch_index"
+  },
+
+  "model_seeds": [
+    101,
+    202,
+    303
+  ],
+
+  "evaluation": {
+    "predictions_denormalized_before_metrics": true,
+
+    "primary_metrics": [
+      "rmse",
+      "mae",
+      "spectral_angle"
+    ],
+
+    "aggregation": {
+      "compute_per_sample": true,
+      "report_mean": true,
+      "report_median": true,
+      "report_standard_deviation": true,
+      "report_p05": true,
+      "report_p95": true
+    },
+
+    "model_selection": {
+      "uses_source_validation_only": true,
+      "uses_source_id_test": false,
+      "uses_ood_test": false
+    },
+
+    "final_evaluation": [
+      "source_id_test",
+      "ood_test_domains"
+    ],
+
+    "spectral_coverage_domain": {
+      "primary_target": "full_Raman_target",
+      "additional_region_analysis_required": true,
+      "additional_regions": [
+        "observed",
+        "unobserved"
+      ]
+    }
+  }
+}

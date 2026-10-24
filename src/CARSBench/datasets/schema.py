@@ -17,16 +17,27 @@ def _to_serializable(value: Any) -> Any:
         return value.item()
 
     if is_dataclass(value):
-        return _to_serializable(asdict(value))
+        return _to_serializable(
+            asdict(value)
+        )
 
     if isinstance(value, dict):
-        return {k: _to_serializable(v) for k, v in value.items()}
+        return {
+            key: _to_serializable(val)
+            for key, val in value.items()
+        }
 
     if isinstance(value, list):
-        return [_to_serializable(v) for v in value]
+        return [
+            _to_serializable(val)
+            for val in value
+        ]
 
     if isinstance(value, tuple):
-        return [_to_serializable(v) for v in value]
+        return [
+            _to_serializable(val)
+            for val in value
+        ]
 
     return value
 
@@ -39,25 +50,46 @@ class SampleMetadata:
 
     sample_id: str
     domain_name: str
+
     seed: Optional[int] = None
     window_mode: Optional[str] = None
+
     generator: str = "frequency"
-    parameters: Dict[str, Any] = field(default_factory=dict)
+
+    parameters: Dict[str, Any] = field(
+        default_factory=dict
+    )
+
     notes: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        return _to_serializable(asdict(self))
+        return _to_serializable(
+            asdict(self)
+        )
 
 
 @dataclass
 class SpectrumSample:
     """
     Canonical 1D CARSBench sample.
+
+    All primary arrays are defined on the canonical benchmark axis.
+
+    `observation_mask` indicates which spectral coordinates were
+    actually observed by the simulated acquisition:
+
+        True  -> measured spectral coordinate
+        False -> unobserved spectral coordinate
+
+    If no mask is explicitly supplied, all spectral coordinates are
+    considered observed.
     """
 
     axis: np.ndarray
     spectrum: np.ndarray
     raman_target: np.ndarray
+
+    observation_mask: Optional[np.ndarray] = None
 
     clean_intensity: Optional[np.ndarray] = None
 
@@ -78,54 +110,172 @@ class SpectrumSample:
     )
 
     def __post_init__(self) -> None:
-        self.axis = np.asarray(self.axis, dtype=np.float64)
-        self.spectrum = np.asarray(self.spectrum, dtype=np.float64)
-        self.raman_target = np.asarray(self.raman_target, dtype=np.float64)
+        # -----------------------------------------------------
+        # Required arrays
+        # -----------------------------------------------------
+
+        self.axis = np.asarray(
+            self.axis,
+            dtype=np.float64,
+        )
+
+        self.spectrum = np.asarray(
+            self.spectrum,
+            dtype=np.float64,
+        )
+
+        self.raman_target = np.asarray(
+            self.raman_target,
+            dtype=np.float64,
+        )
+
+        # -----------------------------------------------------
+        # Observation mask
+        # -----------------------------------------------------
+
+        if self.observation_mask is None:
+            self.observation_mask = np.ones(
+                len(self.axis),
+                dtype=bool,
+            )
+        else:
+            self.observation_mask = np.asarray(
+                self.observation_mask,
+                dtype=bool,
+            )
+
+        # -----------------------------------------------------
+        # Optional arrays
+        # -----------------------------------------------------
 
         if self.clean_intensity is not None:
-            self.clean_intensity = np.asarray(self.clean_intensity, dtype=np.float64)
+            self.clean_intensity = np.asarray(
+                self.clean_intensity,
+                dtype=np.float64,
+            )
 
         if self.chi_r_real is not None:
-            self.chi_r_real = np.asarray(self.chi_r_real, dtype=np.float64)
+            self.chi_r_real = np.asarray(
+                self.chi_r_real,
+                dtype=np.float64,
+            )
 
         if self.chi_r_imag is not None:
-            self.chi_r_imag = np.asarray(self.chi_r_imag, dtype=np.float64)
+            self.chi_r_imag = np.asarray(
+                self.chi_r_imag,
+                dtype=np.float64,
+            )
 
         if self.chi_nr_real is not None:
-            self.chi_nr_real = np.asarray(self.chi_nr_real, dtype=np.float64)
+            self.chi_nr_real = np.asarray(
+                self.chi_nr_real,
+                dtype=np.float64,
+            )
 
         if self.chi_nr_imag is not None:
-            self.chi_nr_imag = np.asarray(self.chi_nr_imag, dtype=np.float64)
+            self.chi_nr_imag = np.asarray(
+                self.chi_nr_imag,
+                dtype=np.float64,
+            )
 
         if self.envelope is not None:
-            self.envelope = np.asarray(self.envelope, dtype=np.float64)
+            self.envelope = np.asarray(
+                self.envelope,
+                dtype=np.float64,
+            )
 
         if self.baseline is not None:
-            self.baseline = np.asarray(self.baseline, dtype=np.float64)
+            self.baseline = np.asarray(
+                self.baseline,
+                dtype=np.float64,
+            )
+
+        # -----------------------------------------------------
+        # Length validation
+        # -----------------------------------------------------
 
         n = len(self.axis)
-        self._validate_length("spectrum", self.spectrum, n)
-        self._validate_length("raman_target", self.raman_target, n)
-        self._validate_length("clean_intensity", self.clean_intensity, n)
-        self._validate_length("chi_r_real", self.chi_r_real, n)
-        self._validate_length("chi_r_imag", self.chi_r_imag, n)
-        self._validate_length("chi_nr_real", self.chi_nr_real, n)
-        self._validate_length("chi_nr_imag", self.chi_nr_imag, n)
-        self._validate_length("envelope", self.envelope, n)
-        self._validate_length("baseline", self.baseline, n)
+
+        self._validate_length(
+            "spectrum",
+            self.spectrum,
+            n,
+        )
+
+        self._validate_length(
+            "raman_target",
+            self.raman_target,
+            n,
+        )
+
+        self._validate_length(
+            "observation_mask",
+            self.observation_mask,
+            n,
+        )
+
+        self._validate_length(
+            "clean_intensity",
+            self.clean_intensity,
+            n,
+        )
+
+        self._validate_length(
+            "chi_r_real",
+            self.chi_r_real,
+            n,
+        )
+
+        self._validate_length(
+            "chi_r_imag",
+            self.chi_r_imag,
+            n,
+        )
+
+        self._validate_length(
+            "chi_nr_real",
+            self.chi_nr_real,
+            n,
+        )
+
+        self._validate_length(
+            "chi_nr_imag",
+            self.chi_nr_imag,
+            n,
+        )
+
+        self._validate_length(
+            "envelope",
+            self.envelope,
+            n,
+        )
+
+        self._validate_length(
+            "baseline",
+            self.baseline,
+            n,
+        )
 
     @staticmethod
-    def _validate_length(name: str, arr: Optional[np.ndarray], n: int) -> None:
+    def _validate_length(
+        name: str,
+        arr: Optional[np.ndarray],
+        n: int,
+    ) -> None:
         if arr is None:
             return
+
         if len(arr) != n:
             raise ValueError(
-                f"{name} has length {len(arr)}, expected {n} to match axis."
+                f"{name} has length {len(arr)}, "
+                f"expected {n} to match axis."
             )
 
     @property
     def num_points(self) -> int:
-        return int(len(self.axis))
+        return int(
+            len(self.axis)
+        )
 
     @property
     def domain_name(self) -> str:
@@ -135,7 +285,10 @@ class SpectrumSample:
     def sample_id(self) -> str:
         return self.metadata.sample_id
 
-    def to_dict(self, include_arrays: bool = True) -> Dict[str, Any]:
+    def to_dict(
+        self,
+        include_arrays: bool = True,
+    ) -> Dict[str, Any]:
         out: Dict[str, Any] = {
             "metadata": self.metadata.to_dict(),
             "num_points": self.num_points,
@@ -144,29 +297,69 @@ class SpectrumSample:
         if include_arrays:
             out.update(
                 {
-                    "axis": _to_serializable(self.axis),
-                    "spectrum": _to_serializable(self.spectrum),
-                    "raman_target": _to_serializable(self.raman_target),
-                    "clean_intensity": _to_serializable(self.clean_intensity),
-                    "chi_r_real": _to_serializable(self.chi_r_real),
-                    "chi_r_imag": _to_serializable(self.chi_r_imag),
-                    "chi_nr_real": _to_serializable(self.chi_nr_real),
-                    "chi_nr_imag": _to_serializable(self.chi_nr_imag),
-                    "envelope": _to_serializable(self.envelope),
-                    "baseline": _to_serializable(self.baseline),
+                    "axis": _to_serializable(
+                        self.axis
+                    ),
+                    "spectrum": _to_serializable(
+                        self.spectrum
+                    ),
+                    "raman_target": _to_serializable(
+                        self.raman_target
+                    ),
+                    "observation_mask": _to_serializable(
+                        self.observation_mask
+                    ),
+                    "clean_intensity": _to_serializable(
+                        self.clean_intensity
+                    ),
+                    "chi_r_real": _to_serializable(
+                        self.chi_r_real
+                    ),
+                    "chi_r_imag": _to_serializable(
+                        self.chi_r_imag
+                    ),
+                    "chi_nr_real": _to_serializable(
+                        self.chi_nr_real
+                    ),
+                    "chi_nr_imag": _to_serializable(
+                        self.chi_nr_imag
+                    ),
+                    "envelope": _to_serializable(
+                        self.envelope
+                    ),
+                    "baseline": _to_serializable(
+                        self.baseline
+                    ),
                 }
             )
 
         return out
 
-    def to_numpy_dict(self) -> Dict[str, Any]:
-        def _f32(x):
-            return np.asarray(x, dtype=np.float32)
+    def to_numpy_dict(
+        self,
+    ) -> Dict[str, Any]:
+        def _f32(
+            x: np.ndarray,
+        ) -> np.ndarray:
+            return np.asarray(
+                x,
+                dtype=np.float32,
+            )
 
         out: Dict[str, Any] = {
-            "axis": _f32(self.axis),
-            "spectrum": _f32(self.spectrum),
-            "raman_target": _f32(self.raman_target),
+            "axis": _f32(
+                self.axis
+            ),
+            "spectrum": _f32(
+                self.spectrum
+            ),
+            "raman_target": _f32(
+                self.raman_target
+            ),
+            "observation_mask": np.asarray(
+                self.observation_mask,
+                dtype=bool,
+            ),
         }
 
         optional_arrays = {
@@ -181,7 +374,9 @@ class SpectrumSample:
 
         for key, value in optional_arrays.items():
             if value is not None:
-                out[key] = _f32(value)
+                out[key] = _f32(
+                    value
+                )
 
         return out
 
@@ -195,31 +390,86 @@ class SampleBatch:
     samples: list[SpectrumSample]
 
     def __len__(self) -> int:
-        return len(self.samples)
+        return len(
+            self.samples
+        )
 
     def __iter__(self):
-        return iter(self.samples)
+        return iter(
+            self.samples
+        )
 
-    def append(self, sample: SpectrumSample) -> None:
-        self.samples.append(sample)
+    def append(
+        self,
+        sample: SpectrumSample,
+    ) -> None:
+        self.samples.append(
+            sample
+        )
 
-    def domain_names(self) -> list[str]:
-        return [s.domain_name for s in self.samples]
+    def domain_names(
+        self,
+    ) -> list[str]:
+        return [
+            sample.domain_name
+            for sample in self.samples
+        ]
 
-    def sample_ids(self) -> list[str]:
-        return [s.sample_id for s in self.samples]
+    def sample_ids(
+        self,
+    ) -> list[str]:
+        return [
+            sample.sample_id
+            for sample in self.samples
+        ]
 
-    def to_metadata_table(self) -> list[dict]:
-        return [s.to_dict(include_arrays=False) for s in self.samples]
+    def to_metadata_table(
+        self,
+    ) -> list[dict]:
+        return [
+            sample.to_dict(
+                include_arrays=False
+            )
+            for sample in self.samples
+        ]
 
-    def stack(self) -> Dict[str, np.ndarray]:
+    def stack(
+        self,
+    ) -> Dict[str, np.ndarray]:
         if len(self.samples) == 0:
-            raise ValueError("Cannot stack an empty SampleBatch.")
+            raise ValueError(
+                "Cannot stack an empty SampleBatch."
+            )
 
         out = {
-            "axis": np.stack([s.axis for s in self.samples], axis=0),
-            "spectrum": np.stack([s.spectrum for s in self.samples], axis=0),
-            "raman_target": np.stack([s.raman_target for s in self.samples], axis=0),
+            "axis": np.stack(
+                [
+                    sample.axis
+                    for sample in self.samples
+                ],
+                axis=0,
+            ),
+            "spectrum": np.stack(
+                [
+                    sample.spectrum
+                    for sample in self.samples
+                ],
+                axis=0,
+            ),
+            "raman_target": np.stack(
+                [
+                    sample.raman_target
+                    for sample in self.samples
+                ],
+                axis=0,
+            ),
+            "observation_mask": np.stack(
+                [
+                    sample.observation_mask
+                    for sample in self.samples
+                ],
+                axis=0,
+            ),
         }
 
         optional_keys = [
@@ -233,8 +483,21 @@ class SampleBatch:
         ]
 
         for key in optional_keys:
-            values = [getattr(s, key) for s in self.samples]
-            if all(v is not None for v in values):
-                out[key] = np.stack(values, axis=0)
+            values = [
+                getattr(
+                    sample,
+                    key,
+                )
+                for sample in self.samples
+            ]
+
+            if all(
+                value is not None
+                for value in values
+            ):
+                out[key] = np.stack(
+                    values,
+                    axis=0,
+                )
 
         return out

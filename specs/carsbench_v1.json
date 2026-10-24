@@ -1,0 +1,309 @@
+{
+  "benchmark_name": "CARSBench",
+  "spec_version": "1.0.0",
+  "status": "frozen",
+  "generator": "frequency",
+  "canonical_axis": {
+    "nu_min_cm1": 400.0,
+    "nu_max_cm1": 3200.0,
+    "num_points": 1024
+  },
+  "observation_representation": "canonical_grid_plus_binary_mask",
+  "observation_windows": {
+    "full": {
+      "nu_min_cm1": 400.0,
+      "nu_max_cm1": 3200.0
+    },
+    "fingerprint": {
+      "nu_min_cm1": 400.0,
+      "nu_max_cm1": 1800.0
+    },
+    "ch": {
+      "nu_min_cm1": 2700.0,
+      "nu_max_cm1": 3150.0
+    },
+    "partial_fingerprint": {
+      "nu_min_cm1": 800.0,
+      "nu_max_cm1": 1800.0
+    },
+    "partial_ch": {
+      "nu_min_cm1": 2800.0,
+      "nu_max_cm1": 3050.0
+    }
+  },
+  "global_rnr_control": {
+    "definition": "max_abs_chi_r_over_median_abs_chi_nr",
+    "distribution": "truncated_lognormal",
+    "log_mean": -1.6917887382307994,
+    "log_sigma": 0.6886309738595188,
+    "min": 0.02,
+    "max": 2.5,
+    "applies_to_all_domains": true,
+    "interpretation": "reference-matched benchmark control distribution, not a universal experimental biological distribution"
+  },
+  "intrinsic_nrb": {
+    "model": "real_frequency_independent_constant",
+    "amplitude": 1.0
+  },
+  "reference_acquisition": {
+    "psf_fwhm_cm1": {
+      "distribution": "uniform",
+      "low": 10.0,
+      "high": 13.0
+    },
+    "envelope_family": "hybrid",
+    "ripple_amplitude": 0.0,
+    "photoelectrons_per_intensity_unit": {
+      "distribution": "log_uniform",
+      "low": 700.0,
+      "high": 3000.0
+    },
+    "read_noise_electrons": 0.7,
+    "calibration_shift_cm1": 0.0,
+    "calibration_warp_cm1": 0.0,
+    "optical_background": {
+      "family": "none",
+      "fraction": 0.0
+    },
+    "electronic_baseline": {
+      "family": "poly",
+      "poly_std": {
+        "distribution": "uniform",
+        "low": 0.008,
+        "high": 0.015
+      },
+      "correlated_std": {
+        "distribution": "uniform",
+        "low": 0.002,
+        "high": 0.005
+      },
+      "correlated_knots": [
+        8,
+        10,
+        12
+      ]
+    }
+  },
+  "chemistry": {
+    "lineshape": "complex_lorentzian",
+    "width_semantics": "HWHM_cm1",
+    "amplitude_semantics": "isolated_Im_chi_r_peak_height_before_mixture_weight_and_global_RNR_scaling",
+    "default_center_jitter_std_cm1": 2.0,
+    "default_width_jitter_log_sigma": 0.15,
+    "default_amplitude_jitter_log_sigma": 0.25,
+    "source_components": [
+      "lipid",
+      "protein",
+      "nucleic_acid"
+    ],
+    "held_out_component": "glycogen",
+    "source_min_components": 2,
+    "source_max_components": 3,
+    "target_min_components": 2,
+    "target_max_components": 3,
+    "component_weight_concentration": 3.0,
+    "min_component_weight": 0.1,
+    "minor_background_max_peaks": 0,
+    "target_requires_glycogen": true,
+    "procedural_parameter_note": "Relative peak amplitudes, presence probabilities, and mixture-distribution parameters are benchmark design parameters and are not claimed to be measured population frequencies."
+  },
+  "domains": {
+    "A_typical": {
+      "track": "reference",
+      "changes": []
+    },
+    "B_high_res": {
+      "track": "resolution",
+      "changes": {
+        "psf_fwhm_cm1": {
+          "distribution": "uniform",
+          "low": 7.0,
+          "high": 9.0
+        }
+      }
+    },
+    "C_low_res": {
+      "track": "resolution",
+      "changes": {
+        "psf_fwhm_cm1": {
+          "distribution": "uniform",
+          "low": 16.0,
+          "high": 22.0
+        }
+      }
+    },
+    "D_high_noise": {
+      "track": "noise",
+      "changes": {
+        "photoelectrons_per_intensity_unit": {
+          "distribution": "log_uniform",
+          "low": 150.0,
+          "high": 700.0
+        }
+      }
+    },
+    "E_calibration_shift": {
+      "track": "calibration",
+      "changes": {
+        "shift_cm1": {
+          "distribution": "uniform",
+          "low": -3.0,
+          "high": 3.0
+        },
+        "warp_cm1": {
+          "distribution": "uniform",
+          "low": -4.0,
+          "high": 4.0
+        }
+      }
+    },
+    "F_window_shift": {
+      "track": "spectral_coverage",
+      "physical_axis_changes": false,
+      "changes": {
+        "observation_window": {
+          "distribution": "categorical",
+          "values": [
+            "fingerprint",
+            "ch",
+            "partial_fingerprint",
+            "partial_ch"
+          ],
+          "probabilities": [
+            0.35,
+            0.35,
+            0.15,
+            0.15
+          ]
+        }
+      }
+    },
+    "G_system_response_shift": {
+      "track": "system_response",
+      "changes": {
+        "envelope_family": "poly"
+      }
+    },
+    "H_biochemical_source": {
+      "track": "chemistry_source",
+      "changes": {
+        "allowed_components": [
+          "lipid",
+          "protein",
+          "nucleic_acid"
+        ],
+        "required_components": [],
+        "min_components": 2,
+        "max_components": 3,
+        "component_weight_concentration": 3.0,
+        "min_component_weight": 0.1,
+        "minor_background_max_peaks": 0
+      }
+    },
+    "I_biochemical_target": {
+      "track": "chemistry_target",
+      "changes": {
+        "allowed_components": [
+          "lipid",
+          "protein",
+          "nucleic_acid",
+          "glycogen"
+        ],
+        "required_components": [
+          "glycogen"
+        ],
+        "min_components": 2,
+        "max_components": 3,
+        "component_weight_concentration": 3.0,
+        "min_component_weight": 0.1,
+        "minor_background_max_peaks": 0
+      }
+    },
+    "J_compound_acquisition": {
+      "track": "compound_acquisition",
+      "changes": [
+        "C_low_res",
+        "D_high_noise",
+        "E_calibration_shift",
+        "G_system_response_shift"
+      ],
+      "includes_window_shift": false,
+      "includes_chemistry_shift": false
+    },
+    "K_joint_ood": {
+      "track": "joint_ood",
+      "changes": [
+        "C_low_res",
+        "D_high_noise",
+        "E_calibration_shift",
+        "G_system_response_shift",
+        "I_biochemical_target"
+      ],
+      "includes_window_shift": false,
+      "includes_chemistry_shift": true
+    }
+  },
+  "benchmark_tracks": {
+    "resolution": {
+      "source": "A_typical",
+      "targets": [
+        "B_high_res",
+        "C_low_res"
+      ]
+    },
+    "noise": {
+      "source": "A_typical",
+      "targets": [
+        "D_high_noise"
+      ]
+    },
+    "calibration": {
+      "source": "A_typical",
+      "targets": [
+        "E_calibration_shift"
+      ]
+    },
+    "spectral_coverage": {
+      "source": "A_typical",
+      "targets": [
+        "F_window_shift"
+      ]
+    },
+    "system_response": {
+      "source": "A_typical",
+      "targets": [
+        "G_system_response_shift"
+      ]
+    },
+    "chemistry": {
+      "source": "H_biochemical_source",
+      "targets": [
+        "I_biochemical_target"
+      ]
+    },
+    "compound_acquisition": {
+      "source": "A_typical",
+      "targets": [
+        "J_compound_acquisition"
+      ]
+    },
+    "joint_ood": {
+      "source": "H_biochemical_source",
+      "targets": [
+        "K_joint_ood"
+      ]
+    }
+  },
+  "seed_policy": {
+    "master_seed_default": 42,
+    "derivation": "BLAKE2b(master_seed|domain_name|sample_index|stream), digest_size=8, converted little-endian unsigned and reduced modulo 2^32",
+    "independent_streams": [
+      "config",
+      "simulation"
+    ],
+    "generation_guarantees": [
+      "chunk_size_invariant",
+      "domain_order_invariant"
+    ]
+  }
+}

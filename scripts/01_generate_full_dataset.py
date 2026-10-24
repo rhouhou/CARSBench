@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
+import shutil
+from dataclasses import asdict
 from pathlib import Path
+from typing import Any
+
+import numpy as np
 
 from CARSBench.configs.defaults import get_base_defaults
 from CARSBench.datasets.schema import SampleBatch
@@ -18,9 +24,11 @@ DEFAULT_DOMAINS = [
     "D_high_noise",
     "E_calibration_shift",
     "F_window_shift",
-    "G_nrb_family_shift",
+    "G_system_response_shift",
     "H_biochemical_source",
     "I_biochemical_target",
+    "J_compound_acquisition",
+    "K_joint_ood",
 ]
 
 
@@ -28,15 +36,6 @@ def derive_seed(
     master_seed: int,
     *parts: object,
 ) -> int:
-    """
-    Derive a deterministic 32-bit child seed from a master seed
-    and an arbitrary sequence of identifying values.
-
-    This makes dataset generation independent of:
-    - chunk size
-    - domain generation order
-    - whether domains are generated together or separately
-    """
     payload = "|".join(
         [
             str(master_seed),
@@ -56,56 +55,240 @@ def derive_seed(
     ) % (2**32)
 
 
+def json_default(
+    value: Any,
+) -> Any:
+    if isinstance(value, np.integer):
+        return int(value)
+
+    if isinstance(value, np.floating):
+        return float(value)
+
+    if isinstance(value, np.bool_):
+        return bool(value)
+
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+
+    raise TypeError(
+        f"Object of type {type(value).__name__} "
+        f"is not JSON serializable."
+    )
+
+
+def metadata_to_dict(
+    sample,
+) -> dict[str, Any]:
+    return asdict(
+        sample.metadata
+    )
+
+
+def append_metadata_jsonl(
+    path: Path,
+    samples,
+) -> None:
+    path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    with path.open(
+        "a",
+        encoding="utf-8",
+    ) as handle:
+        for sample in samples:
+            row = metadata_to_dict(
+                sample
+            )
+
+            handle.write(
+                json.dumps(
+                    row,
+                    default=json_default,
+                    sort_keys=True,
+                )
+            )
+
+            handle.write("\n")
+
+
+def write_generation_manifest(
+    path: Path,
+    *,
+    domain_name: str,
+    start_index: int,
+    samples_per_domain: int,
+    chunk_size: int,
+    n_chunks: int,
+    include_latents: bool,
+    master_seed: int,
+    domain_seed: int,
+    physical_axis_policy: str,
+    observation_policy: str,
+) -> None:
+    end_index_exclusive = (
+        start_index
+        + samples_per_domain
+    )
+
+    manifest = {
+        "format": "CARSBench",
+        "benchmark_version": "1.0.0",
+        "domain_name": domain_name,
+        "generator": "frequency",
+
+        "num_samples": samples_per_domain,
+
+        "start_index": start_index,
+        "end_index_exclusive": end_index_exclusive,
+
+        "chunk_size": chunk_size,
+        "n_chunks": n_chunks,
+
+        "include_latents": include_latents,
+
+        "master_seed": master_seed,
+        "domain_seed": domain_seed,
+
+        "seed_policy": (
+            "deterministic_seed_derived_from_"
+            "master_seed_domain_name_sample_index_"
+            "and_random_stream"
+        ),
+
+        "chunk_invariant_generation": True,
+        "domain_order_invariant_generation": True,
+
+        "physical_axis_policy": (
+            physical_axis_policy
+        ),
+
+        "observation_policy": (
+            observation_policy
+        ),
+
+        "observation_representation": (
+            "canonical_grid_plus_binary_mask"
+        ),
+
+        "metadata_format": "jsonl",
+        "metadata_streamed": True,
+
+        "memory_policy": (
+            "memory_scales_with_chunk_size_not_domain_size"
+        ),
+    }
+
+    path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    with path.open(
+        "w",
+        encoding="utf-8",
+    ) as handle:
+        json.dump(
+            manifest,
+            handle,
+            indent=2,
+            sort_keys=True,
+        )
+
+        handle.write("\n")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Generate the CARSBench synthetic benchmark dataset."
+        description=(
+            "Generate CARSBench synthetic spectra."
+        )
     )
 
     parser.add_argument(
         "--output-root",
         type=str,
         default="data/carsbench_v1",
-        help="Root directory for the generated dataset.",
     )
 
     parser.add_argument(
         "--samples-per-domain",
         type=int,
         default=5000,
-        help="Number of spectra generated for each selected domain.",
+    )
+
+    parser.add_argument(
+        "--start-index",
+        type=int,
+        default=0,
+        help=(
+            "Global benchmark sample index assigned to the first "
+            "generated sample."
+        ),
     )
 
     parser.add_argument(
         "--chunk-size",
         type=int,
         default=500,
-        help="Number of samples written per NPZ batch.",
     )
 
     parser.add_argument(
         "--seed",
         type=int,
         default=42,
-        help="Master random seed.",
     )
 
     parser.add_argument(
         "--include-latents",
         action="store_true",
-        help=(
-            "Save latent arrays such as chi_r, chi_nr, "
-            "clean_intensity, envelope, and baseline."
-        ),
     )
 
     parser.add_argument(
         "--domains",
         nargs="*",
         default=DEFAULT_DOMAINS,
-        help="Domains to generate.",
+    )
+
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help=(
+            "Delete existing selected domain output before "
+            "regeneration."
+        ),
     )
 
     return parser.parse_args()
+
+
+def prepare_domain_directory(
+    domain_root: Path,
+    *,
+    overwrite: bool,
+) -> None:
+    if domain_root.exists():
+        has_contents = any(
+            domain_root.iterdir()
+        )
+
+        if has_contents:
+            if not overwrite:
+                raise FileExistsError(
+                    f"Output domain already exists and is non-empty: "
+                    f"{domain_root}\n"
+                    f"Use --overwrite to regenerate this domain."
+                )
+
+            shutil.rmtree(
+                domain_root
+            )
+
+    domain_root.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
 
 def main() -> None:
@@ -114,6 +297,11 @@ def main() -> None:
     if args.samples_per_domain <= 0:
         raise ValueError(
             "--samples-per-domain must be greater than zero."
+        )
+
+    if args.start_index < 0:
+        raise ValueError(
+            "--start-index must be greater than or equal to zero."
         )
 
     if args.chunk_size <= 0:
@@ -141,14 +329,16 @@ def main() -> None:
                 f"Available domains: {available_domains}"
             )
 
-    # =========================================================
-    # Generate each requested domain
-    # =========================================================
-
     for domain_name in args.domains:
         print()
         print(
             f"=== Generating {domain_name} ==="
+        )
+
+        print(
+            f"index range: "
+            f"[{args.start_index}, "
+            f"{args.start_index + args.samples_per_domain})"
         )
 
         domain_cfg = registry.get(
@@ -160,18 +350,14 @@ def main() -> None:
             / domain_name
         )
 
+        prepare_domain_directory(
+            domain_root,
+            overwrite=args.overwrite,
+        )
+
         writer = DatasetWriter(
             domain_root
         )
-
-        # -----------------------------------------------------
-        # Domain-local simulator and sampler
-        # -----------------------------------------------------
-        #
-        # Their internal random state is not used as the primary
-        # sample identity. Explicit deterministic seeds are supplied
-        # below for every configuration and simulation realization.
-        # -----------------------------------------------------
 
         domain_seed = derive_seed(
             args.seed,
@@ -188,9 +374,9 @@ def main() -> None:
             seed=domain_seed
         )
 
-        # -----------------------------------------------------
-        # Resolve the domain-level axis constraints once
-        # -----------------------------------------------------
+        # =====================================================
+        # Fixed canonical physical axis
+        # =====================================================
 
         template_seed = derive_seed(
             args.seed,
@@ -210,32 +396,42 @@ def main() -> None:
             )
         )
 
-        if domain_name == "F_window_shift":
-            # F deliberately varies spectral coverage between
-            # samples, but all samples retain a common array length.
-            section_overrides = {
-                "axis": {
-                    "num_points": template_axis.get(
-                        "num_points"
-                    ),
-                }
-            }
+        required_axis_keys = {
+            "nu_min",
+            "nu_max",
+            "num_points",
+        }
 
-            axis_policy = (
-                "spectral_window_varies_per_sample;"
-                "num_points_fixed_within_domain"
+        missing_axis_keys = (
+            required_axis_keys
+            - set(
+                template_axis.keys()
+            )
+        )
+
+        if missing_axis_keys:
+            raise ValueError(
+                "Resolved axis configuration is missing "
+                f"required keys: "
+                f"{sorted(missing_axis_keys)}"
             )
 
-        else:
-            # All other diagnostic domains use one common physical
-            # spectral grid. This prevents accidental spectral-axis
-            # variation from confounding the intended domain shift.
-            section_overrides = {
-                "axis": template_axis,
-            }
+        section_overrides = {
+            "axis": template_axis,
+        }
 
-            axis_policy = (
-                "spectral_axis_fixed_within_domain"
+        physical_axis_policy = (
+            "physical_spectral_axis_fixed_within_domain"
+        )
+
+        if domain_name == "F_window_shift":
+            observation_policy = (
+                "observation_window_varies_per_"
+                "sample_on_fixed_canonical_axis"
+            )
+        else:
+            observation_policy = (
+                "full_observation_on_fixed_canonical_axis"
             )
 
         n_total = (
@@ -252,7 +448,11 @@ def main() -> None:
             - 1
         ) // chunk_size
 
-        all_samples = []
+        metadata_path = (
+            domain_root
+            / "metadata"
+            / "metadata.jsonl"
+        )
 
         # =====================================================
         # Generate chunks
@@ -261,33 +461,47 @@ def main() -> None:
         for chunk_idx in range(
             n_chunks
         ):
-            start = (
+            local_start = (
                 chunk_idx
                 * chunk_size
             )
 
-            end = min(
-                (chunk_idx + 1)
+            local_end = min(
+                (
+                    chunk_idx
+                    + 1
+                )
                 * chunk_size,
                 n_total,
+            )
+
+            global_start = (
+                args.start_index
+                + local_start
+            )
+
+            global_end = (
+                args.start_index
+                + local_end
             )
 
             print(
                 f"  chunk "
                 f"{chunk_idx + 1}/{n_chunks}"
-                f" | samples "
-                f"{start}..{end - 1}"
+                f" | global samples "
+                f"{global_start}..{global_end - 1}"
             )
 
             chunk_samples = []
 
-            for sample_index in range(
-                start,
-                end,
+            for local_index in range(
+                local_start,
+                local_end,
             ):
-                # ---------------------------------------------
-                # Independent deterministic seed streams
-                # ---------------------------------------------
+                sample_index = (
+                    args.start_index
+                    + local_index
+                )
 
                 config_seed = derive_seed(
                     args.seed,
@@ -303,14 +517,12 @@ def main() -> None:
                     "simulation",
                 )
 
-                # ---------------------------------------------
-                # Resolve stochastic domain parameters
-                # ---------------------------------------------
-
                 sample_domain_spec = (
                     sampler.resolve_with_overrides(
                         domain=domain_cfg,
-                        section_overrides=section_overrides,
+                        section_overrides=(
+                            section_overrides
+                        ),
                         seed=config_seed,
                     )
                 )
@@ -320,13 +532,11 @@ def main() -> None:
                     f"{sample_index:06d}"
                 )
 
-                # ---------------------------------------------
-                # Generate spectrum
-                # ---------------------------------------------
-
                 sample = (
                     simulator.simulate_sample(
-                        domain_spec=sample_domain_spec,
+                        domain_spec=(
+                            sample_domain_spec
+                        ),
                         sample_id=sample_id,
                         seed=simulation_seed,
                         generator="frequency",
@@ -344,10 +554,6 @@ def main() -> None:
                 chunk_samples
             )
 
-            # ---------------------------------------------
-            # Save current chunk
-            # ---------------------------------------------
-
             writer.write_batch_npz(
                 batch=batch,
                 filename=(
@@ -358,66 +564,64 @@ def main() -> None:
                 compress=True,
             )
 
-            all_samples.extend(
-                chunk_samples
+            append_metadata_jsonl(
+                metadata_path,
+                chunk_samples,
             )
 
-        # =====================================================
-        # Save metadata
-        # =====================================================
-
-        writer.write_metadata_jsonl(
-            samples=all_samples,
-            filename="metadata.jsonl",
-            relative_dir="metadata",
-        )
+            del batch
+            del chunk_samples
 
         # =====================================================
-        # Save manifest
+        # Manifest
         # =====================================================
 
-        writer.write_manifest(
-            samples=all_samples,
-            filename="manifest.json",
-            relative_dir=".",
-            extra={
-                "domain_name": domain_name,
-                "samples_per_domain": n_total,
-                "chunk_size": chunk_size,
-                "include_latents": bool(
-                    args.include_latents
-                ),
-                "master_seed": args.seed,
-                "domain_seed": domain_seed,
-                "seed_policy": (
-                    "deterministic_seed_derived_from_"
-                    "master_seed_domain_name_sample_index_"
-                    "and_random_stream"
-                ),
-                "chunk_invariant_generation": True,
-                "domain_order_invariant_generation": True,
-                "axis_policy": axis_policy,
-                "generator": "frequency",
-            },
+        write_generation_manifest(
+            domain_root
+            / "manifest.json",
+
+            domain_name=domain_name,
+
+            start_index=(
+                args.start_index
+            ),
+
+            samples_per_domain=(
+                n_total
+            ),
+
+            chunk_size=(
+                chunk_size
+            ),
+
+            n_chunks=(
+                n_chunks
+            ),
+
+            include_latents=bool(
+                args.include_latents
+            ),
+
+            master_seed=(
+                args.seed
+            ),
+
+            domain_seed=(
+                domain_seed
+            ),
+
+            physical_axis_policy=(
+                physical_axis_policy
+            ),
+
+            observation_policy=(
+                observation_policy
+            ),
         )
 
         print(
             f"Saved: {domain_root}"
         )
-
-
-# Example:
-#
-# python scripts/01_generate_full_dataset.py \
-#     --samples-per-domain 5000 \
-#     --chunk-size 500
-#
-# Generate only selected domains:
-#
-# python scripts/01_generate_full_dataset.py \
-#     --domains A_typical D_high_noise \
-#     --samples-per-domain 1000 \
-#     --chunk-size 250
 
 
 if __name__ == "__main__":

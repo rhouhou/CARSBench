@@ -5,59 +5,108 @@ from typing import Mapping, Optional
 import numpy as np
 
 
+def expected_photoelectrons(
+    signal: np.ndarray,
+    photoelectrons_per_intensity_unit: float,
+) -> np.ndarray:
+    """
+    Convert simulator intensity units into expected detected
+    photoelectron counts.
+
+    Negative input values are clipped because photon counts
+    cannot be negative.
+    """
+    if photoelectrons_per_intensity_unit <= 0:
+        raise ValueError(
+            "`photoelectrons_per_intensity_unit` must be positive."
+        )
+
+    signal = np.asarray(
+        signal,
+        dtype=np.float64,
+    )
+
+    signal_pos = np.clip(
+        signal,
+        0.0,
+        None,
+    )
+
+    return (
+        photoelectrons_per_intensity_unit
+        * signal_pos
+    )
+
+
 def apply_shot_noise(
     signal: np.ndarray,
     rng: np.random.Generator,
-    shot_scale: float,
+    photoelectrons_per_intensity_unit: float,
 ) -> np.ndarray:
     """
-    Poisson-like shot noise.
-    """
-    signal = np.asarray(signal, dtype=np.float64)
-    signal_pos = np.clip(signal, 0.0, None)
+    Apply Poisson shot noise.
 
-    lam = shot_scale * signal_pos
-    return rng.poisson(lam) / shot_scale
+    The simulator signal is mapped into expected detected
+    photoelectrons, Poisson sampled, then converted back into
+    simulator intensity units.
+    """
+    lam = expected_photoelectrons(
+        signal=signal,
+        photoelectrons_per_intensity_unit=(
+            photoelectrons_per_intensity_unit
+        ),
+    )
+
+    counts = rng.poisson(
+        lam
+    )
+
+    return (
+        counts
+        / photoelectrons_per_intensity_unit
+    )
 
 
 def apply_read_noise(
     signal: np.ndarray,
     rng: np.random.Generator,
-    read_sigma: float,
-    shot_scale: float = 1.0,
+    read_noise_electrons: float,
+    photoelectrons_per_intensity_unit: float,
 ) -> np.ndarray:
     """
-    Add Gaussian read noise.
+    Add Gaussian detector read noise.
+
+    `read_noise_electrons` is the standard deviation in detected
+    electron units. It is converted back into simulator intensity
+    units before being added to the spectrum.
     """
-    signal = np.asarray(signal, dtype=np.float64)
-    noise = rng.normal(0.0, read_sigma / shot_scale, size=len(signal))
-    return signal + noise
-
-
-def apply_spikes(
-    signal: np.ndarray,
-    rng: np.random.Generator,
-    spike_prob: float,
-    spike_min: float,
-    spike_max: float,
-) -> np.ndarray:
-    """
-    Add sparse impulsive spikes.
-    """
-    signal = np.asarray(signal, dtype=np.float64).copy()
-
-    if spike_prob <= 0:
-        return signal
-
-    mask = rng.random(len(signal)) < spike_prob
-
-    if np.any(mask):
-        amps = np.exp(
-            rng.uniform(np.log(spike_min), np.log(spike_max), size=int(np.sum(mask)))
+    if read_noise_electrons < 0:
+        raise ValueError(
+            "`read_noise_electrons` must be non-negative."
         )
-        signal[mask] += amps
 
-    return signal
+    if photoelectrons_per_intensity_unit <= 0:
+        raise ValueError(
+            "`photoelectrons_per_intensity_unit` must be positive."
+        )
+
+    signal = np.asarray(
+        signal,
+        dtype=np.float64,
+    )
+
+    sigma_intensity = (
+        read_noise_electrons
+        / photoelectrons_per_intensity_unit
+    )
+
+    noise = rng.normal(
+        0.0,
+        sigma_intensity,
+        size=signal.shape,
+    )
+
+    return signal + noise
 
 
 def build_noise(
@@ -66,29 +115,49 @@ def build_noise(
     cfg: Optional[Mapping[str, object]] = None,
 ) -> np.ndarray:
     """
-    Full detector noise model.
+    Mixed Poisson-Gaussian detector noise model.
+
+    Noise consists of:
+    1. Poisson shot noise in detected photoelectron space.
+    2. Gaussian read noise in electron units.
+
+    Sparse impulsive spikes are intentionally excluded from the
+    core CARSBench v1 detector-noise model.
     """
     if cfg is None:
         cfg = {}
 
-    shot_scale = float(cfg.get("shot_scale", 1e5))
-    read_sigma = float(cfg.get("read_sigma", 2.0))
-    spike_prob = float(cfg.get("spike_prob", 0.0))
+    photoelectron_scale = float(
+        cfg.get(
+            "photoelectrons_per_intensity_unit",
+            1e4,
+        )
+    )
 
-    spike_min_default = 3.0 * max(read_sigma / shot_scale, 1e-12)
-    spike_max_default = 50.0 * max(read_sigma / shot_scale, 1e-12)
+    read_noise_electrons = float(
+        cfg.get(
+            "read_noise_electrons",
+            1.0,
+        )
+    )
 
-    spike_min = float(cfg.get("spike_min", spike_min_default) or spike_min_default)
-    spike_max = float(cfg.get("spike_max", spike_max_default) or spike_max_default)
-
-    out = apply_shot_noise(signal, rng=rng, shot_scale=shot_scale)
-    out = apply_read_noise(out, rng=rng, read_sigma=read_sigma, shot_scale=shot_scale)
-    out = apply_spikes(
-        out,
+    out = apply_shot_noise(
+        signal=signal,
         rng=rng,
-        spike_prob=spike_prob,
-        spike_min=spike_min,
-        spike_max=spike_max,
+        photoelectrons_per_intensity_unit=(
+            photoelectron_scale
+        ),
+    )
+
+    out = apply_read_noise(
+        signal=out,
+        rng=rng,
+        read_noise_electrons=(
+            read_noise_electrons
+        ),
+        photoelectrons_per_intensity_unit=(
+            photoelectron_scale
+        ),
     )
 
     return out

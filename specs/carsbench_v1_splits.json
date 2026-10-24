@@ -1,0 +1,168 @@
+{
+  "benchmark_name": "CARSBench",
+  "benchmark_version": "1.0.0",
+  "split_spec_version": "1.0.0",
+  "status": "frozen",
+
+  "master_dataset_seed": 42,
+
+  "principles": {
+    "strict_zero_shot_ood": true,
+    "target_domains_used_for_training": false,
+    "target_domains_used_for_validation": false,
+    "hyperparameter_selection_uses_source_validation_only": true,
+    "final_model_selection_uses_ood_test": false
+  },
+
+  "source_split_sizes": {
+    "train": 100000,
+    "validation": 10000,
+    "id_test": 10000
+  },
+
+  "ood_test_size_per_domain": 10000,
+
+  "index_ranges": {
+    "source_train": {
+      "start": 0,
+      "end_exclusive": 100000
+    },
+
+    "source_validation": {
+      "start": 100000,
+      "end_exclusive": 110000
+    },
+
+    "source_id_test": {
+      "start": 110000,
+      "end_exclusive": 120000
+    },
+
+    "ood_test": {
+      "start": 0,
+      "end_exclusive": 10000
+    }
+  },
+
+  "acquisition_track": {
+    "source_domain": "A_typical",
+
+    "source_splits": {
+      "train": {
+        "start_index": 0,
+        "num_samples": 100000
+      },
+
+      "validation": {
+        "start_index": 100000,
+        "num_samples": 10000
+      },
+
+      "id_test": {
+        "start_index": 110000,
+        "num_samples": 10000
+      }
+    },
+
+    "ood_test_domains": {
+      "B_high_res": {
+        "start_index": 0,
+        "num_samples": 10000
+      },
+
+      "C_low_res": {
+        "start_index": 0,
+        "num_samples": 10000
+      },
+
+      "D_high_noise": {
+        "start_index": 0,
+        "num_samples": 10000
+      },
+
+      "E_calibration_shift": {
+        "start_index": 0,
+        "num_samples": 10000
+      },
+
+      "F_window_shift": {
+        "start_index": 0,
+        "num_samples": 10000
+      },
+
+      "G_system_response_shift": {
+        "start_index": 0,
+        "num_samples": 10000
+      },
+
+      "J_compound_acquisition": {
+        "start_index": 0,
+        "num_samples": 10000
+      }
+    }
+  },
+
+  "chemistry_track": {
+    "source_domain": "H_biochemical_source",
+
+    "source_splits": {
+      "train": {
+        "start_index": 0,
+        "num_samples": 100000
+      },
+
+      "validation": {
+        "start_index": 100000,
+        "num_samples": 10000
+      },
+
+      "id_test": {
+        "start_index": 110000,
+        "num_samples": 10000
+      }
+    },
+
+    "ood_test_domains": {
+      "I_biochemical_target": {
+        "start_index": 0,
+        "num_samples": 10000
+      }
+    }
+  },
+
+  "joint_ood_track": {
+    "source_domain": "H_biochemical_source",
+
+    "reuse_source_training_split": true,
+
+    "ood_test_domains": {
+      "K_joint_ood": {
+        "start_index": 0,
+        "num_samples": 10000
+      }
+    }
+  },
+
+  "evaluation_policy": {
+    "primary_reporting": [
+      "source_id_test",
+      "individual_ood_targets",
+      "compound_acquisition_target",
+      "chemistry_target",
+      "joint_ood_target"
+    ],
+
+    "ood_test_sets_are_blind_during_model_development": true,
+
+    "model_hyperparameters_selected_on": "source_validation",
+
+    "training_random_seeds_are_separate_from_dataset_generation_seed": true
+  },
+
+  "notes": [
+    "Source train, validation, and ID-test sample-index ranges are disjoint.",
+    "Different domains may reuse numerical sample indices because domain_name is part of deterministic seed derivation.",
+    "OOD target domains are not used for hyperparameter tuning in the strict benchmark.",
+    "Few-shot adaptation and target-domain fine-tuning, if studied later, constitute separate benchmark protocols and do not modify the strict zero-shot v1 results."
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "model_seed": 101,
+  "training_config": {
+    "batch_size": 64,
+    "early_stopping_min_delta": 1e-05,
+    "early_stopping_patience": 4,
+    "gradient_clip_norm": 1.0,
+    "learning_rate": 0.001,
+    "maximum_epochs": 12,
+    "weight_decay": 0.0001
+  },
+  "training_result": {
+    "best_epoch": 10,
+    "best_validation_mse": 0.12403861433267593,
+    "epochs_completed": 12,
+    "history": [
+      {
+        "epoch": 0.0,
+        "train_normalized_mse": 0.8602402657270432,
+        "validation_normalized_mse": 0.7010070085525513
+      },
+      {
+        "epoch": 1.0,
+        "train_normalized_mse": 0.5684775561094284,
+        "validation_normalized_mse": 0.5365357398986816
+      },
+      {
+        "epoch": 2.0,
+        "train_normalized_mse": 0.30016306787729263,
+        "validation_normalized_mse": 0.2756485939025879
+      },
+      {
+        "epoch": 3.0,
+        "train_normalized_mse": 0.20221132412552834,
+        "validation_normalized_mse": 0.23180830478668213
+      },
+      {
+        "epoch": 4.0,
+        "train_normalized_mse": 0.1645156852900982,
+        "validation_normalized_mse": 0.19665241241455078
+      },
+      {
+        "epoch": 5.0,
+        "train_normalized_mse": 0.14850585721433163,
+        "validation_normalized_mse": 0.19042320549488068
+      },
+      {
+        "epoch": 6.0,
+        "train_normalized_mse": 0.1285314355045557,
+        "validation_normalized_mse": 0.16527114808559418
+      },
+      {
+        "epoch": 7.0,
+        "train_normalized_mse": 0.12391407787799835,
+        "validation_normalized_mse": 0.16539373993873596
+      },
+      {
+        "epoch": 8.0,
+        "train_normalized_mse": 0.12084167450666428,
+        "validation_normalized_mse": 0.16381718218326569
+      },
+      {
+        "epoch": 9.0,
+        "train_normalized_mse": 0.1025879755616188,
+        "validation_normalized_mse": 0.14968779683113098
+      },
+      {
+        "epoch": 10.0,
+        "train_normalized_mse": 0.09171032160520554,
+        "validation_normalized_mse": 0.12403861433267593
+      },
+      {
+        "epoch": 11.0,
+        "train_normalized_mse": 0.09335704147815704,
+        "validation_normalized_mse": 0.13227611780166626
+      }
+    ],
+    "stopped_early": false
+  }
+}

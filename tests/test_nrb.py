@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from CARSBench.physics.nrb import generate_nrb
 
@@ -10,12 +11,13 @@ def test_nrb_is_complex_array_with_zero_imaginary_part():
         1024,
     )
 
-    rng = np.random.default_rng(42)
+    rng = np.random.default_rng(
+        42
+    )
 
     chi_nr = generate_nrb(
-        axis=axis,
-        rng=rng,
-        cfg={},
+        axis,
+        rng,
     )
 
     assert np.iscomplexobj(
@@ -25,113 +27,96 @@ def test_nrb_is_complex_array_with_zero_imaginary_part():
     np.testing.assert_allclose(
         np.imag(chi_nr),
         0.0,
-        atol=1e-12,
     )
 
 
-def test_nrb_real_part_is_positive():
+def test_nrb_is_frequency_independent():
     axis = np.linspace(
         400.0,
         3200.0,
         1024,
     )
 
-    rng = np.random.default_rng(42)
+    rng = np.random.default_rng(
+        42
+    )
 
     chi_nr = generate_nrb(
-        axis=axis,
-        rng=rng,
-        cfg={},
+        axis,
+        rng,
     )
 
-    assert np.all(
-        np.real(chi_nr) > 0.0
+    np.testing.assert_allclose(
+        np.real(chi_nr),
+        np.real(chi_nr[0]),
     )
 
 
-def test_nrb_has_correct_shape():
+def test_default_nrb_amplitude_is_one():
     axis = np.linspace(
         400.0,
         3200.0,
         1024,
     )
 
-    rng = np.random.default_rng(42)
-
-    chi_nr = generate_nrb(
-        axis=axis,
-        rng=rng,
-        cfg={},
+    rng = np.random.default_rng(
+        42
     )
 
-    assert chi_nr.shape == axis.shape
+    chi_nr = generate_nrb(
+        axis,
+        rng,
+    )
+
+    np.testing.assert_allclose(
+        np.real(chi_nr),
+        1.0,
+    )
 
 
-def test_flat_nrb_is_spectrally_flat():
+def test_configured_nrb_amplitude():
     axis = np.linspace(
         400.0,
         3200.0,
         1024,
     )
 
-    rng = np.random.default_rng(42)
+    rng = np.random.default_rng(
+        42
+    )
 
     chi_nr = generate_nrb(
-        axis=axis,
-        rng=rng,
+        axis,
+        rng,
         cfg={
-            "family": "flat",
-            "alpha": 1.0,
+            "amplitude": 2.5,
         },
     )
 
     np.testing.assert_allclose(
         np.real(chi_nr),
-        np.real(chi_nr)[0],
+        2.5,
     )
 
 
-def test_poly_nrb_is_not_flat():
+def test_nonpositive_nrb_amplitude_raises():
     axis = np.linspace(
         400.0,
         3200.0,
         1024,
     )
 
-    rng = np.random.default_rng(42)
-
-    chi_nr = generate_nrb(
-        axis=axis,
-        rng=rng,
-        cfg={
-            "family": "poly",
-            "alpha": 1.0,
-        },
+    rng = np.random.default_rng(
+        42
     )
 
-    assert np.std(
-        np.real(chi_nr)
-    ) > 0.0
-
-
-def test_exp_tilt_nrb_is_not_flat():
-    axis = np.linspace(
-        400.0,
-        3200.0,
-        1024,
-    )
-
-    rng = np.random.default_rng(42)
-
-    chi_nr = generate_nrb(
-        axis=axis,
-        rng=rng,
-        cfg={
-            "family": "exp_tilt",
-            "alpha": 1.0,
-        },
-    )
-
-    assert np.std(
-        np.real(chi_nr)
-    ) > 0.0
+    with pytest.raises(
+        ValueError
+    ):
+        generate_nrb(
+            axis,
+            rng,
+            cfg={
+                "amplitude": 0.0,
+            },
+        )

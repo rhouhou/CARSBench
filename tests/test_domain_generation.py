@@ -9,7 +9,7 @@ def test_all_domains_generate_samples():
         "D_high_noise",
         "E_calibration_shift",
         "F_window_shift",
-        "G_nrb_family_shift",
+        "G_system_response_shift",
         "H_biochemical_source",
         "I_biochemical_target",
     ]

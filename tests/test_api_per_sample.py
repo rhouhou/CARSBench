@@ -103,33 +103,77 @@ def test_typical_domain_axis_is_fixed():
             reference_axis,
         )
 
-def test_window_shift_domain_can_vary_axis():
+def test_window_shift_domain_varies_observation_window():
     batch = generate_dataset(
         num_samples=30,
         domain_name="F_window_shift",
         seed=42,
     )
 
-    axes = [
-        sample.axis
-        for sample in batch.samples
-    ]
+    # ---------------------------------------------------------
+    # Physical spectral axis must remain canonical and identical
+    # across all F samples.
+    # ---------------------------------------------------------
 
-    num_points = {
-        len(axis)
-        for axis in axes
-    }
+    reference_axis = batch.samples[0].axis
 
-    # All samples must retain a common tensor size.
-    assert len(num_points) == 1
+    assert len(reference_axis) == 1024
+    assert np.isclose(
+        reference_axis[0],
+        400.0,
+    )
+    assert np.isclose(
+        reference_axis[-1],
+        3200.0,
+    )
 
-    # But at least some spectral windows should differ.
-    axis_signatures = {
-        (
-            float(axis[0]),
-            float(axis[-1]),
+    for sample in batch.samples:
+        np.testing.assert_allclose(
+            sample.axis,
+            reference_axis,
         )
-        for axis in axes
+
+    # ---------------------------------------------------------
+    # Observation windows should vary between samples.
+    # ---------------------------------------------------------
+
+    mask_signatures = {
+        sample.observation_mask.tobytes()
+        for sample in batch.samples
     }
 
-    assert len(axis_signatures) > 1
+    assert len(mask_signatures) > 1
+
+    # ---------------------------------------------------------
+    # Every mask must match the canonical axis length.
+    # ---------------------------------------------------------
+
+    for sample in batch.samples:
+        assert (
+            sample.observation_mask.shape
+            == sample.axis.shape
+        )
+
+        assert (
+            sample.observation_mask.dtype
+            == np.bool_
+        )
+
+        # F must observe at least part of the spectrum.
+        assert np.any(
+            sample.observation_mask
+        )
+
+        # F is a partial-window domain, so at least some points
+        # should be unobserved.
+        assert np.any(
+            ~sample.observation_mask
+        )
+
+        # Unobserved model-input coordinates are explicitly zero.
+        np.testing.assert_allclose(
+            sample.spectrum[
+                ~sample.observation_mask
+            ],
+            0.0,
+        )

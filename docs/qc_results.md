@@ -50,7 +50,7 @@ Domain-specific QC checks whether each benchmark domain shows the expected type 
 | `D_high_noise` | Stronger stochastic measurement degradation |
 | `E_calibration_shift` | Spectral-axis offset or warping |
 | `F_window_shift` | Changed or partial spectral coverage |
-| `G_nrb_family_shift` | Altered NRB functional shape |
+| `G_system_response_shift` | Altered NRB functional shape |
 | `H_biochemical_source` | Source biochemical composition |
 | `I_biochemical_target` | Shifted target biochemical composition |
 

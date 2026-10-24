@@ -1,0 +1,9 @@
+{
+  "num_observed_spectrum_values": 5120000,
+  "num_samples": 5000,
+  "num_target_values": 5120000,
+  "spectrum_mean": 1.000846025417935,
+  "spectrum_std": 0.14854307583300347,
+  "target_mean": 0.0167711124677582,
+  "target_std": 0.04484253532154453
+}

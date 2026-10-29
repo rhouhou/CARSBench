@@ -70,3 +70,8 @@ docs/*.docx
 
 # Logs
 *.log
+
+# Generated CARSBench validation / cross-simulator outputs
+results/cross_simulator
+results/simulator_validation
+results/simulator_validation_local_backup_*/
